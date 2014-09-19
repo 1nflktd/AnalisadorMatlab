@@ -20,6 +20,13 @@
 #define TKFechaChave 16
 #define TKVirgula 17
 #define TKPontoeVirg 18
+#define TKString 19
+#define TKAbreColchete 20
+#define TKFechaColchete 21
+#define TKSubtracao 22
+#define TKMultiplicacao 23
+#define TKPotencia 24
+#define TKDivisao 25
 
 int pos = 0;
 
@@ -76,6 +83,12 @@ int rec_equ(char st[], char lex[])
 				estado = 1;
 				break;
 			}
+			if (c == '\'')
+			{
+				pos++;
+				estado = 2;
+				break;
+			}
 			if (c == '=')
 			{
 				lex[posl] = '\0';
@@ -86,40 +99,76 @@ int rec_equ(char st[], char lex[])
 			{
 				lex[posl] = '\0';
 				pos++;
-				return TKSoma; 
+				return TKSoma;
+			}
+			if (c == '-')
+			{
+				lex[posl] = '\0';
+				pos++;
+				return TKSubtracao;
+			}
+			if (c == '*')
+			{
+				lex[posl] = '\0';
+				pos++;
+				return TKMultiplicacao;
+			}
+			if (c == '^')
+			{
+				lex[posl] = '\0';
+				pos++;
+				return TKPotencia;
+			}
+			if (c == '/')
+			{
+				lex[posl] = '\0';
+				pos++;
+				return TKDivisao;
 			}
 			if (c == '(')
-			{ 
-				lex[posl] = '\0'; 
+			{
+				lex[posl] = '\0';
 				pos++;
-				return TKAbrePar; 
+				return TKAbrePar;
 			}
 			if (c == ')')
 			{
-				lex[posl] = '\0'; 
-				pos++; 
-				return TKFechaPar; 
+				lex[posl] = '\0';
+				pos++;
+				return TKFechaPar;
 			}
 			if (c == '{')
-			{ 
+			{
 				lex[posl] = '\0';
-				pos++; 
+				pos++;
 				return TKAbreChave;
 			}
 			if (c == '}')
 			{
-				lex[posl] = '\0'; 
-				pos++; 
+				lex[posl] = '\0';
+				pos++;
 				return TKFechaChave;
 			}
-			if (c == ',')
-			{ 
+			if (c == '[')
+			{
 				lex[posl] = '\0';
-				pos++; 
-				return TKVirgula; 
+				pos++;
+				return TKAbreColchete;
+			}
+			if (c == ']')
+			{
+				lex[posl] = '\0';
+				pos++;
+				return TKFechaColchete;
+			}
+			if (c == ',')
+			{
+				lex[posl] = '\0';
+				pos++;
+				return TKVirgula;
 			}
 			if (c == ';')
-			{ 
+			{
 				lex[posl] = '\0';
 				pos++;
 				return TKPontoeVirg;
@@ -142,6 +191,15 @@ int rec_equ(char st[], char lex[])
 			}
 			lex[--posl] = '\0';
 			return palavra_reservada(lex);
+		case 2:
+			if (c == '\'')
+			{
+				lex[posl] = '\0';
+				pos++;
+				return TKString;
+			}
+			pos++;
+			break;
 		}
 	}
 }
