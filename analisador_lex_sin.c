@@ -272,5 +272,38 @@ int main()
 	{
 		printf("%d %s\n", tk, lex);
 	}
+	
+
+
+	/*
+	
+	FILE * fp = fopen("C:\\Users\\UCS\\Documents\\analex\\teste.txt", "r");
+	int i = 0;
+	size_t space = 1;
+	char* characters = (char *)malloc(space);
+
+	if (fp == NULL)
+		printf("Erro ao abrir o arquivo.\n");
+
+	while ((ch = fgetc(fp)) != EOF)
+	{
+		characters[i] = ch;
+		i++;
+		space++;
+		characters = (char *)realloc(characters, space);
+	}
+	
+	//for (int x = 0; x < i; x++) {
+	//	printf("%c\n", characters[x]);
+	//}
+
+	while ((tk = rec_equ(characters, lex)) != -1)
+	{
+		printf("%d %s\n", tk, lex);
+	}
+	
+	*/
+	
 	system("pause");
 }
+
