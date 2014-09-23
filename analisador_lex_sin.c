@@ -27,6 +27,8 @@
 #define TKMultiplicacao 23
 #define TKPotencia 24
 #define TKDivisao 25
+#define TKComentario 26
+#define TKConstante 27
 
 int pos = 0;
 
@@ -83,10 +85,22 @@ int rec_equ(char st[], char lex[])
 				estado = 1;
 				break;
 			}
+			if (c >= '0' && c <= '9' || c == '.')
+			{
+				estado = 7;
+				pos++;
+				break;
+			}
 			if (c == '\'')
 			{
 				pos++;
 				estado = 2;
+				break;
+			}
+			if (c == '%')
+			{
+				pos++;
+				estado = 3;
 				break;
 			}
 			if (c == '=')
@@ -192,14 +206,58 @@ int rec_equ(char st[], char lex[])
 			lex[--posl] = '\0';
 			return palavra_reservada(lex);
 		case 2:
-			if (c == '\'')
+			if (c != '\'')
 			{
-				lex[posl] = '\0';
 				pos++;
-				return TKString;
+				break;
+			}
+			pos++;
+			lex[posl] = '\0';
+			return TKString;
+		case 3:
+			if (c == '{')
+			{
+				estado = 4;
+			}
+			else
+			{
+				estado = 6;
 			}
 			pos++;
 			break;
+		case 4:
+			if (c == '%')
+			{
+				estado = 5;
+			}
+			pos++;
+			break;
+		case 5:
+			if (c != '}')
+			{
+				estado = 4;
+				pos++;
+				break;
+			}
+			pos++;
+			lex[posl] = '\0';
+			return TKComentario;
+		case 6:
+			if (c != '\0')
+			{
+				pos++;
+				break;
+			}
+			lex[posl] = '\0';
+			return TKComentario;
+		case 7:
+			if (c >= '0' && c <= '9' || c == '.')
+			{
+				pos++;
+				break;
+			}
+			lex[--posl] = '\0';
+			return TKConstante;
 		}
 	}
 }
