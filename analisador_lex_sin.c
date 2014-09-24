@@ -29,6 +29,16 @@
 #define TKDivisao 25
 #define TKComentario 26
 #define TKConstante 27
+#define TKIgual 28
+#define TKDiferente 29
+#define TKMaior 30
+#define TKMaiorIgual 31
+#define TKMenor 32
+#define TKMenorIgual 33
+#define TKEBinario 34
+#define TKELogico 35
+#define TKOuLogico 36
+#define TKOuBinario 37
 
 int pos = 0;
 
@@ -79,122 +89,127 @@ int rec_equ(char st[], char lex[])
 		switch (estado)
 		{
 		case 0:
-			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_')
-			{
-				pos++;
-				estado = 1;
-				break;
-			}
-			if (c >= '0' && c <= '9' || c == '.')
-			{
-				estado = 7;
-				pos++;
-				break;
-			}
-			if (c == '\'')
-			{
-				pos++;
-				estado = 2;
-				break;
-			}
-			if (c == '%')
-			{
-				pos++;
-				estado = 3;
-				break;
-			}
-			if (c == '=')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKAtrib;
-			}
-			if (c == '+')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKSoma;
-			}
-			if (c == '-')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKSubtracao;
-			}
-			if (c == '*')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKMultiplicacao;
-			}
-			if (c == '^')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKPotencia;
-			}
-			if (c == '/')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKDivisao;
-			}
-			if (c == '(')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKAbrePar;
-			}
-			if (c == ')')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKFechaPar;
-			}
-			if (c == '{')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKAbreChave;
-			}
-			if (c == '}')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKFechaChave;
-			}
-			if (c == '[')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKAbreColchete;
-			}
-			if (c == ']')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKFechaColchete;
-			}
-			if (c == ',')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKVirgula;
-			}
-			if (c == ';')
-			{
-				lex[posl] = '\0';
-				pos++;
-				return TKPontoeVirg;
-			}
-			if (c == ' ' || c == '\n')
-			{
-				pos++;
-				posl--;
-			}
 			if (c == '\0')
 			{
 				return -1;
+			}
+			pos++;
+			if (c == ' ' || c == '\n')
+			{
+				posl--;
+				break;
+			}
+			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_')
+			{
+				estado = 1;
+				break;
+			}
+			else if (c >= '0' && c <= '9' || c == '.')
+			{
+				estado = 7;
+				break;
+			}
+			else if (c == '\'')
+			{
+				estado = 2;
+				break;
+			}
+			else if (c == '%')
+			{
+				estado = 3;
+				break;
+			}
+			else if (c == '=') {
+				estado = 8;
+				break;
+			}
+			else if (c == '~') {
+				estado = 9;
+				break;
+			}
+			else if (c == '>') {
+				estado = 10;
+				break;
+			}
+			else if (c == '<')
+			{
+				estado = 11;
+				break;
+			}
+			else if (c == '&')
+			{
+				estado = 12;
+				break;
+			}
+			else if (c == '|')
+			{
+				estado = 13;
+				break;
+			}
+			else if (c == '+')
+			{
+				lex[posl] = '\0';
+				return TKSoma;
+			}
+			else if (c == '-')
+			{
+				lex[posl] = '\0';
+				return TKSubtracao;
+			}
+			else if (c == '*')
+			{
+				lex[posl] = '\0';
+				return TKMultiplicacao;
+			}
+			else if (c == '^')
+			{
+				lex[posl] = '\0';
+				return TKPotencia;
+			}
+			else if (c == '/')
+			{
+				lex[posl] = '\0';
+				return TKDivisao;
+			}
+			else if (c == '(')
+			{
+				lex[posl] = '\0';
+				return TKAbrePar;
+			}
+			else if (c == ')')
+			{
+				lex[posl] = '\0';
+				return TKFechaPar;
+			}
+			else if (c == '{')
+			{
+				lex[posl] = '\0';
+				return TKAbreChave;
+			}
+			else if (c == '}')
+			{
+				lex[posl] = '\0';
+				return TKFechaChave;
+			}
+			else if (c == '[')
+			{
+				lex[posl] = '\0';
+				return TKAbreColchete;
+			}
+			else if (c == ']')
+			{
+				lex[posl] = '\0';
+				return TKFechaColchete;
+			}
+			else if (c == ',')
+			{
+				lex[posl] = '\0';
+				return TKVirgula;
+			}
+			else if (c == ';')
+			{
+				lex[posl] = '\0';
+				return TKPontoeVirg;
 			}
 			break;
 		case 1:
@@ -206,12 +221,11 @@ int rec_equ(char st[], char lex[])
 			lex[--posl] = '\0';
 			return palavra_reservada(lex);
 		case 2:
+			pos++;
 			if (c != '\'')
 			{
-				pos++;
 				break;
 			}
-			pos++;
 			lex[posl] = '\0';
 			return TKString;
 		case 3:
@@ -233,17 +247,16 @@ int rec_equ(char st[], char lex[])
 			pos++;
 			break;
 		case 5:
+			pos++;
 			if (c != '}')
 			{
 				estado = 4;
-				pos++;
 				break;
 			}
-			pos++;
 			lex[posl] = '\0';
 			return TKComentario;
 		case 6:
-			if (c != '\0')
+			if (c != '\n')
 			{
 				pos++;
 				break;
@@ -258,27 +271,96 @@ int rec_equ(char st[], char lex[])
 			}
 			lex[--posl] = '\0';
 			return TKConstante;
+		case 8:
+			pos++;
+			lex[posl] = '\0';
+			if (c == '=')
+			{
+				return TKIgual;
+			}
+			else 
+			{
+				return TKAtrib;
+			}
+			break;
+		case 9:
+			if (c == '=')
+			{
+				pos++;
+				lex[posl] = '\0';
+				return TKDiferente;
+			}
+			break;
+		case 10:
+			pos++;
+			lex[posl] = '\0';
+			if (c == '=')
+			{
+				return TKMaiorIgual;
+			}
+			else
+			{
+				return TKMaior;
+			}
+			break;
+		case 11:
+			pos++;
+			lex[posl] = '\0';
+			if (c == '=')
+			{
+				return TKMenorIgual;
+			}
+			else
+			{
+				return TKMenor;
+			}
+			break;
+		case 12:
+			pos++;
+			lex[posl] = '\0';
+			if (c == '&')
+			{
+				return TKELogico;
+			}
+			else
+			{
+				return TKEBinario;
+			}
+			break;
+		case 13:
+			pos++;
+			lex[posl] = '\0';
+			if (c == '|')
+			{
+				return TKOuLogico;
+			}
+			else
+			{
+				return TKOuBinario;
+			}
+			break;
 		}
+
 	}
 }
 
 int main()
 {
 	int tk;
-	char exp1[200], lex[20];
+	char lex[20];
+	/*
+	char exp1[200];
 	printf("Digite o programa a ser analisado (ex: void main(){int a,b,c;a=b+c;}\n");
 	gets(exp1);
 	while ((tk = rec_equ(exp1, lex)) != -1)
 	{
 		printf("%d %s\n", tk, lex);
 	}
+	*/
 	
-
-
-	/*
-	
-	FILE * fp = fopen("C:\\Users\\UCS\\Documents\\analex\\teste.txt", "r");
+	FILE * fp = fopen("C:\\Users\\UCS\\Documents\\MATLAB\\Untitled.m", "r");
 	int i = 0;
+	char ch;
 	size_t space = 1;
 	char* characters = (char *)malloc(space);
 
@@ -292,7 +374,9 @@ int main()
 		space++;
 		characters = (char *)realloc(characters, space);
 	}
-	
+
+	characters[i] = '\0';
+
 	//for (int x = 0; x < i; x++) {
 	//	printf("%c\n", characters[x]);
 	//}
@@ -301,9 +385,15 @@ int main()
 	{
 		printf("%d %s\n", tk, lex);
 	}
-	
-	*/
-	
-	system("pause");
-}
 
+	for (int i = 0; i < 20; i++)
+	{
+		lex[i] = '\0';
+	}
+
+	printf("%s\n", lex);
+
+	//getchar();
+	system("pause");
+	return 0;
+}
