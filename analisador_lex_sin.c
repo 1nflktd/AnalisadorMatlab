@@ -39,6 +39,7 @@
 #define TKELogico 35
 #define TKOuLogico 36
 #define TKOuBinario 37
+#define TKFuncao 38
 
 int pos = 0;
 
@@ -80,7 +81,8 @@ int rec_equ(char st[], char lex[])
 {
 	int estado = 0,
 		fim = 0,
-		posl = 0;
+		posl = 0,
+		palavra;
 
 	while (!fim)
 	{
@@ -213,13 +215,19 @@ int rec_equ(char st[], char lex[])
 			}
 			break;
 		case 1:
-			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_')
+			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_')
 			{
 				pos++;
 				break;
 			}
+			palavra = palavra_reservada(lex);
+			if (palavra == TKId)
+			{
+				estado = 14;
+				break;
+			}
 			lex[--posl] = '\0';
-			return palavra_reservada(lex);
+			return palavra;
 		case 2:
 			pos++;
 			if (c != '\'')
@@ -278,7 +286,7 @@ int rec_equ(char st[], char lex[])
 			{
 				return TKIgual;
 			}
-			else 
+			else
 			{
 				return TKAtrib;
 			}
@@ -339,6 +347,19 @@ int rec_equ(char st[], char lex[])
 				return TKOuBinario;
 			}
 			break;
+		case 14:
+			posl--;
+			if (c == ' ')
+			{
+				pos++;
+				break;
+			}
+			lex[--posl] = '\0';
+			if (c == '(')
+			{
+				return TKFuncao;
+			}
+			return TKId;
 		}
 
 	}
@@ -354,10 +375,10 @@ int main()
 	gets(exp1);
 	while ((tk = rec_equ(exp1, lex)) != -1)
 	{
-		printf("%d %s\n", tk, lex);
+	printf("%d %s\n", tk, lex);
 	}
 	*/
-	
+
 	FILE * fp = fopen("C:\\Users\\UCS\\Documents\\MATLAB\\Untitled.m", "r");
 	int i = 0;
 	char ch;
