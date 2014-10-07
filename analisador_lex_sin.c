@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TKFim -1
+#define TKErro -2
 #define TKId 1
 #define TKWhile 2
 #define TKFor 3
@@ -28,7 +30,7 @@
 #define TKPotencia 24
 #define TKDivisao 25
 #define TKComentario 26
-#define TKConstante 27
+#define TKConstanteInteira 27
 #define TKIgual 28
 #define TKDiferente 29
 #define TKMaior 30
@@ -39,7 +41,9 @@
 #define TKELogico 35
 #define TKOuLogico 36
 #define TKOuBinario 37
-#define TKFuncao 38
+#define TKConstanteReal 38
+#define TKFunction 39
+#define TKBreak 40
 
 int pos = 0;
 
@@ -59,6 +63,8 @@ struct pal_res lista_pal[] =
 	{ "if", TKIf },
 	{ "else", TKElse },
 	{ "elseif", TKElseIf },
+	{ "function", TKFunction },
+	{ "break", TKBreak },
 	{ "fimtabela", TKId }
 };
 
@@ -93,126 +99,43 @@ int rec_equ(char st[], char lex[])
 		case 0:
 			if (c == '\0')
 			{
-				return -1;
+				return TKFim;
 			}
+
 			pos++;
-			if (c == ' ' || c == '\n')
-			{
-				posl--;
-				break;
-			}
-			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_')
+			if (c == ' ' || c == '\n'){ posl--;	break; }
+
+			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
 			{
 				estado = 1;
 				break;
 			}
-			else if (c >= '0' && c <= '9' || c == '.')
-			{
-				estado = 7;
-				break;
-			}
-			else if (c == '\'')
-			{
-				estado = 2;
-				break;
-			}
-			else if (c == '%')
-			{
-				estado = 3;
-				break;
-			}
-			else if (c == '=') {
-				estado = 8;
-				break;
-			}
-			else if (c == '~') {
-				estado = 9;
-				break;
-			}
-			else if (c == '>') {
-				estado = 10;
-				break;
-			}
-			else if (c == '<')
-			{
-				estado = 11;
-				break;
-			}
-			else if (c == '&')
-			{
-				estado = 12;
-				break;
-			}
-			else if (c == '|')
-			{
-				estado = 13;
-				break;
-			}
-			else if (c == '+')
-			{
-				lex[posl] = '\0';
-				return TKSoma;
-			}
-			else if (c == '-')
-			{
-				lex[posl] = '\0';
-				return TKSubtracao;
-			}
-			else if (c == '*')
-			{
-				lex[posl] = '\0';
-				return TKMultiplicacao;
-			}
-			else if (c == '^')
-			{
-				lex[posl] = '\0';
-				return TKPotencia;
-			}
-			else if (c == '/')
-			{
-				lex[posl] = '\0';
-				return TKDivisao;
-			}
-			else if (c == '(')
-			{
-				lex[posl] = '\0';
-				return TKAbrePar;
-			}
-			else if (c == ')')
-			{
-				lex[posl] = '\0';
-				return TKFechaPar;
-			}
-			else if (c == '{')
-			{
-				lex[posl] = '\0';
-				return TKAbreChave;
-			}
-			else if (c == '}')
-			{
-				lex[posl] = '\0';
-				return TKFechaChave;
-			}
-			else if (c == '[')
-			{
-				lex[posl] = '\0';
-				return TKAbreColchete;
-			}
-			else if (c == ']')
-			{
-				lex[posl] = '\0';
-				return TKFechaColchete;
-			}
-			else if (c == ',')
-			{
-				lex[posl] = '\0';
-				return TKVirgula;
-			}
-			else if (c == ';')
-			{
-				lex[posl] = '\0';
-				return TKPontoeVirg;
-			}
+			if (c >= '0' && c <= '9') { estado = 7; break; }
+			if (c == '.') { estado = 14; break; }
+			if (c == '\'') { estado = 2; break; }
+			if (c == '%') { estado = 3; break; }
+			if (c == '=') { estado = 8; break; }
+			if (c == '~') { estado = 9; break; }
+			if (c == '>') { estado = 10; break; }
+			if (c == '<') { estado = 11; break; }
+			if (c == '&') { estado = 12; break; }
+			if (c == '|') { estado = 13; break; }
+
+			lex[posl] = '\0';
+			if (c == '+') { return TKSoma; }
+			if (c == '-') { return TKSubtracao; }
+			if (c == '*') { return TKMultiplicacao; }
+			if (c == '^') { return TKPotencia; }
+			if (c == '/') { return TKDivisao; }
+			if (c == '(') { return TKAbrePar; }
+			if (c == ')') { return TKFechaPar; }
+			if (c == '{') { return TKAbreChave; }
+			if (c == '}') { return TKFechaChave; }
+			if (c == '[') { return TKAbreColchete; }
+			if (c == ']') { return TKFechaColchete; }
+			if (c == ',') { return TKVirgula; }
+			if (c == ';') { return TKPontoeVirg; }
+			if (c == '_') { return TKErro; }
 			break;
 		case 1:
 			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_')
@@ -220,13 +143,8 @@ int rec_equ(char st[], char lex[])
 				pos++;
 				break;
 			}
-			palavra = palavra_reservada(lex);
-			if (palavra == TKId)
-			{
-				estado = 14;
-				break;
-			}
 			lex[--posl] = '\0';
+			palavra = palavra_reservada(lex);
 			return palavra;
 		case 2:
 			pos++;
@@ -238,13 +156,14 @@ int rec_equ(char st[], char lex[])
 			return TKString;
 		case 3:
 			if (c == '{')
-			{
 				estado = 4;
+			else if (c == '\n')
+			{
+				lex[--posl] = '\0';
+				return TKComentario;
 			}
 			else
-			{
 				estado = 6;
-			}
 			pos++;
 			break;
 		case 4:
@@ -269,16 +188,60 @@ int rec_equ(char st[], char lex[])
 				pos++;
 				break;
 			}
-			lex[posl] = '\0';
+			lex[--posl] = '\0';
 			return TKComentario;
 		case 7:
-			if (c >= '0' && c <= '9' || c == '.')
+			if (c >= '0' && c <= '9')
 			{
 				pos++;
 				break;
 			}
+			else if (c == '.')
+			{
+				pos++;
+				estado = 14;
+				break;
+			}
+			else if (c == 'e')
+			{
+				pos++;
+				estado = 15;
+				break;
+			}
 			lex[--posl] = '\0';
-			return TKConstante;
+			return TKConstanteInteira;
+		case 14:
+			if (c >= '0' && c <= '9')
+			{
+				pos++;
+				break;
+			}
+			if (c == 'e')
+			{
+				pos++;
+				estado = 15;
+				break;
+			}
+			if (c == '.')
+			{
+				pos++;
+				return TKErro;
+			}
+			lex[--posl] = '\0';
+			return TKConstanteReal;
+		case 15:
+			if (c >= '0' && c <= '9')
+			{
+				pos++;
+				break;
+			}
+			if (c == '.' || c == 'e')
+			{
+				pos++;
+				return TKErro;
+			}
+			lex[--posl] = '\0';
+			return TKConstanteReal;
 		case 8:
 			pos++;
 			lex[posl] = '\0';
@@ -346,29 +309,14 @@ int rec_equ(char st[], char lex[])
 			{
 				return TKOuBinario;
 			}
-			break;
-		case 14:
-			posl--;
-			if (c == ' ')
-			{
-				pos++;
-				break;
-			}
-			lex[--posl] = '\0';
-			if (c == '(')
-			{
-				return TKFuncao;
-			}
-			return TKId;
 		}
-
 	}
 }
 
 int main()
 {
 	int tk;
-	char lex[20];
+	char lex[200];
 	/*
 	char exp1[200];
 	printf("Digite o programa a ser analisado (ex: void main(){int a,b,c;a=b+c;}\n");
@@ -402,8 +350,13 @@ int main()
 	//	printf("%c\n", characters[x]);
 	//}
 
-	while ((tk = rec_equ(characters, lex)) != -1)
+	while ((tk = rec_equ(characters, lex)) != TKFim)
 	{
+		if (tk == TKErro)
+		{
+			printf("Ocorreu um erro lexico!\n");
+			break;
+		}
 		printf("%d %s\n", tk, lex);
 	}
 
