@@ -83,7 +83,7 @@ int palavra_reservada(char lex[])
 }
 
 
-int rec_equ(char st[], char lex[])
+int rec_equ(char st[], char lex[], int * linha, int * coluna)
 {
 	int estado = 0,
 		fim = 0,
@@ -93,6 +93,7 @@ int rec_equ(char st[], char lex[])
 	while (!fim)
 	{
 		char c = st[pos];
+		(*coluna) += 1;
 		lex[posl++] = c;
 		switch (estado)
 		{
@@ -101,10 +102,17 @@ int rec_equ(char st[], char lex[])
 			{
 				return TKFim;
 			}
-
 			pos++;
-			if (c == ' ' || c == '\n'){ posl--;	break; }
-
+			if (c == ' '){ 
+				posl--;	
+				break; 
+			}
+			if(c == '\n'){
+				posl--;	
+				(*linha) += 1;
+				(*coluna) = 0;
+				break; 
+			}
 			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
 			{
 				estado = 1;
@@ -156,14 +164,20 @@ int rec_equ(char st[], char lex[])
 			return TKString;
 		case 3:
 			if (c == '{')
+			{
 				estado = 4;
+			}
 			else if (c == '\n')
 			{
 				lex[--posl] = '\0';
+				(*linha) += 1;
+				(*coluna) = 0;
 				return TKComentario;
 			}
 			else
+			{
 				estado = 6;
+			}
 			pos++;
 			break;
 		case 4:
@@ -188,6 +202,8 @@ int rec_equ(char st[], char lex[])
 				pos++;
 				break;
 			}
+			(*linha) += 1;
+			(*coluna) = 0;
 			lex[--posl] = '\0';
 			return TKComentario;
 		case 7:
@@ -317,24 +333,18 @@ int main()
 {
 	int tk;
 	char lex[200];
-	/*
-	char exp1[200];
-	printf("Digite o programa a ser analisado (ex: void main(){int a,b,c;a=b+c;}\n");
-	gets(exp1);
-	while ((tk = rec_equ(exp1, lex)) != -1)
-	{
-	printf("%d %s\n", tk, lex);
-	}
-	*/
-
-	FILE * fp = fopen("C:\\Users\\UCS\\Documents\\MATLAB\\Untitled.m", "r");
 	int i = 0;
 	char ch;
 	size_t space = 1;
 	char* characters = (char *)malloc(space);
 
+	FILE * fp = fopen("Untitled.m", "r");
+
 	if (fp == NULL)
+	{
 		printf("Erro ao abrir o arquivo.\n");
+		exit(1);
+	}
 
 	while ((ch = fgetc(fp)) != EOF)
 	{
@@ -346,26 +356,29 @@ int main()
 
 	characters[i] = '\0';
 
-	//for (int x = 0; x < i; x++) {
-	//	printf("%c\n", characters[x]);
-	//}
+	FILE * newFile = fopen("resultado.txt", "w");
 
-	while ((tk = rec_equ(characters, lex)) != TKFim)
+	if (newFile == NULL)
+	{
+		printf("Erro ao abrir o arquivo.\n");
+		exit(1);
+	}
+
+	int linha = 1, coluna = 0, colunaX = 1;
+	while ((tk = rec_equ(characters, lex, &linha, &coluna)) != TKFim)
 	{
 		if (tk == TKErro)
 		{
 			printf("Ocorreu um erro lexico!\n");
 			break;
 		}
-		printf("%d %s\n", tk, lex);
+		colunaX = coluna - strlen(lex);
+		printf("Token: %d Lex: %s Linha: %d Coluna: %d\n", tk, lex, linha, colunaX);
+		fprintf(newFile, "%d %s\n", tk, lex);
 	}
 
-	for (int i = 0; i < 20; i++)
-	{
-		lex[i] = '\0';
-	}
-
-	printf("%s\n", lex);
+	//printf("%s\n", lex);
+	fclose(newFile);
 
 	//getchar();
 	system("pause");
