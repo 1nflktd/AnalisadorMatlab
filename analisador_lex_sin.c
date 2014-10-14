@@ -93,25 +93,27 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 	while (!fim)
 	{
 		char c = st[pos];
-		(*coluna) += 1;
 		lex[posl++] = c;
 		switch (estado)
 		{
 		case 0:
+			(*coluna) += 1;
 			if (c == '\0')
 			{
 				return TKFim;
 			}
 			pos++;
-			if (c == ' '){ 
-				posl--;	
-				break; 
+			if (c == ' ')
+			{
+				posl--;
+				break;
 			}
-			if(c == '\n'){
-				posl--;	
+			if (c == '\n')
+			{
+				posl--;
 				(*linha) += 1;
 				(*coluna) = 0;
-				break; 
+				break;
 			}
 			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
 			{
@@ -170,8 +172,6 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			else if (c == '\n')
 			{
 				lex[--posl] = '\0';
-				(*linha) += 1;
-				(*coluna) = 0;
 				return TKComentario;
 			}
 			else
@@ -202,8 +202,6 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 				pos++;
 				break;
 			}
-			(*linha) += 1;
-			(*coluna) = 0;
 			lex[--posl] = '\0';
 			return TKComentario;
 		case 7:
@@ -259,14 +257,15 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			lex[--posl] = '\0';
 			return TKConstanteReal;
 		case 8:
-			pos++;
-			lex[posl] = '\0';
 			if (c == '=')
 			{
+				pos++;
+				lex[posl] = '\0';
 				return TKIgual;
 			}
 			else
 			{
+				lex[--posl] = '\0';
 				return TKAtrib;
 			}
 			break;
@@ -279,50 +278,54 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			}
 			break;
 		case 10:
-			pos++;
-			lex[posl] = '\0';
 			if (c == '=')
 			{
+				pos++;
+				lex[posl] = '\0';
 				return TKMaiorIgual;
 			}
 			else
 			{
+				lex[--posl] = '\0';
 				return TKMaior;
 			}
 			break;
 		case 11:
-			pos++;
-			lex[posl] = '\0';
 			if (c == '=')
 			{
+				pos++;
+				lex[posl] = '\0';
 				return TKMenorIgual;
 			}
 			else
 			{
+				lex[--posl] = '\0';
 				return TKMenor;
 			}
 			break;
 		case 12:
-			pos++;
-			lex[posl] = '\0';
 			if (c == '&')
 			{
+				pos++;
+				lex[posl] = '\0';
 				return TKELogico;
 			}
 			else
 			{
+				lex[--posl] = '\0';
 				return TKEBinario;
 			}
 			break;
 		case 13:
-			pos++;
-			lex[posl] = '\0';
 			if (c == '|')
 			{
+				pos++;
+				lex[posl] = '\0';
 				return TKOuLogico;
 			}
 			else
 			{
+				lex[--posl] = '\0';
 				return TKOuBinario;
 			}
 		}
@@ -338,7 +341,7 @@ int main()
 	size_t space = 1;
 	char* characters = (char *)malloc(space);
 
-	FILE * fp = fopen("Untitled.m", "r");
+	FILE * fp = fopen("C:\\Users\\UCS\\Documents\\MATLAB\\Untitled.m", "r");
 
 	if (fp == NULL)
 	{
@@ -356,7 +359,7 @@ int main()
 
 	characters[i] = '\0';
 
-	FILE * newFile = fopen("resultado.txt", "w");
+	FILE * newFile = fopen("C:\\Users\\UCS\\Documents\\MATLAB\\resultado.txt", "w");
 
 	if (newFile == NULL)
 	{
@@ -364,7 +367,7 @@ int main()
 		exit(1);
 	}
 
-	int linha = 1, coluna = 0, colunaX = 1;
+	int linha = 1, coluna = 0;
 	while ((tk = rec_equ(characters, lex, &linha, &coluna)) != TKFim)
 	{
 		if (tk == TKErro)
@@ -372,15 +375,18 @@ int main()
 			printf("Ocorreu um erro lexico!\n");
 			break;
 		}
-		colunaX = coluna - strlen(lex);
-		printf("Token: %d Lex: %s Linha: %d Coluna: %d\n", tk, lex, linha, colunaX);
-		fprintf(newFile, "%d %s\n", tk, lex);
+
+		printf("Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
+		fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
+		coluna += strlen(lex) - 1;
+		if (lex[strlen(lex) - 1] == '\n')
+			linha++;
 	}
 
 	//printf("%s\n", lex);
 	fclose(newFile);
 
-	//getchar();
-	system("pause");
+	getchar();
+	//system("pause");
 	return 0;
 }
