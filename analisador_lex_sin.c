@@ -341,7 +341,7 @@ int main()
 	size_t space = 1;
 	char* characters = (char *)malloc(space);
 
-	FILE * fp = fopen("C:\\Users\\UCS\\Documents\\MATLAB\\Untitled.m", "r");
+	FILE * fp = fopen("Untitled.m", "r");
 
 	if (fp == NULL)
 	{
@@ -359,7 +359,7 @@ int main()
 
 	characters[i] = '\0';
 
-	FILE * newFile = fopen("C:\\Users\\UCS\\Documents\\MATLAB\\resultado.txt", "w");
+	FILE * newFile = fopen("Saida.lex", "w");
 
 	if (newFile == NULL)
 	{
