@@ -49,6 +49,8 @@
 #define TKCatch 43
 #define TKContinue 44
 #define TKReturn 45
+#define TKTrue 46
+#define TKFalse 47
 
 int pos = 0;
 
@@ -75,6 +77,8 @@ struct pal_res lista_pal[] =
 	{ "catch", TKCatch },
 	{ "continue", TKContinue },
 	{ "return", TKReturn },
+	{ "true", TKTrue },
+   	{ "false", TKFalse }, 	
 	{ "fimtabela", TKId }
 };
 
@@ -113,7 +117,7 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 				return TKFim;
 			}
 			pos++;
-			if (c == ' ')
+			if (c == ' ' || c == '\t')
 			{
 				posl--;
 				break;
@@ -359,11 +363,11 @@ int main()
 	size_t space = 1;
 	char* characters = (char *)malloc(space);
 
-	FILE * fp = fopen("C:\\Untitled.m", "r");
+	FILE * fp = fopen("Entrada.m", "r");
 
 	if (fp == NULL)
 	{
-		printf("Erro ao abrir o arquivo de entrada.\n");
+		printf("Erro ao abrir o arquivo de entrada (Entrada.m).\n");
 		getchar();
 		exit(1);
 	}
@@ -378,11 +382,11 @@ int main()
 
 	characters[i] = '\0';
 
-	FILE * newFile = fopen("C:\\Saida.lex", "wb+");
+	FILE * newFile = fopen("Saida.lex", "wb+");
 
 	if (newFile == NULL)
 	{
-		printf("Erro ao abrir o arquivo de saida.\n");
+		printf("Erro ao abrir o arquivo de saida (Saida.lex).\n");
 		getchar();
 		exit(1);
 	}
