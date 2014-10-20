@@ -168,6 +168,10 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			return palavra;
 		case 2:
 			pos++;
+			if (c == '\n')
+			{
+				return TKErro;
+			}
 			if (c != '\'')
 			{
 				break;
@@ -202,7 +206,7 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			if (c == '%')
 			{
 				break;
-			} 
+			}
 			else if (c != '}')
 			{
 				estado = 4;
@@ -355,11 +359,11 @@ int main()
 	size_t space = 1;
 	char* characters = (char *)malloc(space);
 
-	FILE * fp = fopen("Untitled.m", "r");
+	FILE * fp = fopen("C:\\Untitled.m", "r");
 
 	if (fp == NULL)
 	{
-		printf("Erro ao abrir o arquivo.\n");
+		printf("Erro ao abrir o arquivo de entrada.\n");
 		getchar();
 		exit(1);
 	}
@@ -374,11 +378,11 @@ int main()
 
 	characters[i] = '\0';
 
-	FILE * newFile = fopen("Saida.lex", "w");
+	FILE * newFile = fopen("C:\\Saida.lex", "wb+");
 
 	if (newFile == NULL)
 	{
-		printf("Erro ao abrir o arquivo.\n");
+		printf("Erro ao abrir o arquivo de saida.\n");
 		getchar();
 		exit(1);
 	}
