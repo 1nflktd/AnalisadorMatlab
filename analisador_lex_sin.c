@@ -44,6 +44,11 @@
 #define TKConstanteReal 38
 #define TKFunction 39
 #define TKBreak 40
+#define TKParfor 41
+#define TKTry 42
+#define TKCatch 43
+#define TKContinue 44
+#define TKReturn 45
 
 int pos = 0;
 
@@ -65,6 +70,11 @@ struct pal_res lista_pal[] =
 	{ "elseif", TKElseIf },
 	{ "function", TKFunction },
 	{ "break", TKBreak },
+	{ "parfor", TKParfor },
+	{ "try", TKTry },
+	{ "catch", TKCatch },
+	{ "continue", TKContinue },
+	{ "return", TKReturn },
 	{ "fimtabela", TKId }
 };
 
@@ -189,7 +199,11 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			break;
 		case 5:
 			pos++;
-			if (c != '}')
+			if (c == '%')
+			{
+				break;
+			} 
+			else if (c != '}')
 			{
 				estado = 4;
 				break;
@@ -346,6 +360,7 @@ int main()
 	if (fp == NULL)
 	{
 		printf("Erro ao abrir o arquivo.\n");
+		getchar();
 		exit(1);
 	}
 
@@ -364,6 +379,7 @@ int main()
 	if (newFile == NULL)
 	{
 		printf("Erro ao abrir o arquivo.\n");
+		getchar();
 		exit(1);
 	}
 
@@ -383,9 +399,9 @@ int main()
 			linha++;
 	}
 
-	//printf("%s\n", lex);
 	fclose(newFile);
 
+	printf("Arquivo gerado com sucesso!");
 	getchar();
 	//system("pause");
 	return 0;
