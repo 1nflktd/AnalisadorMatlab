@@ -42,6 +42,13 @@ TKOuBinario = 37
 TKConstanteReal = 38
 TKFunction = 39
 TKBreak = 40
+TKParfor = 41
+TKTry = 42
+TKCatch = 43
+TKContinue = 44
+TKReturn = 45
+TKTrue = 46
+TKFalse = 47
 
 pos = 0
 linha = 1
@@ -56,18 +63,25 @@ class pal_res():
         self.tk = tk
 
 lista_pal = [
-        pal_res("while", TKWhile),
-        pal_res("for", TKFor),
-        pal_res("switch", TKSwitch),
-        pal_res("case", TKCase),
-        pal_res("otherwise", TKOtherwise),
-        pal_res("end", TKEnd),
-        pal_res("if", TKIf),
-        pal_res("else", TKElse),
-        pal_res("elseif", TKElseIf),
-        pal_res("function", TKFunction),
-        pal_res("break", TKBreak)
-    ]
+	pal_res("while", TKWhile),
+	pal_res("for", TKFor),
+	pal_res("switch", TKSwitch),
+	pal_res("case", TKCase),
+	pal_res("otherwise", TKOtherwise),
+	pal_res("end", TKEnd),
+	pal_res("if", TKIf),
+	pal_res("else", TKElse),
+	pal_res("elseif", TKElseIf),
+	pal_res("function", TKFunction),
+	pal_res("break", TKBreak),
+	pal_res("parfor", TKParfor),
+	pal_res("try", TKTry),
+	pal_res("catch", TKCatch),
+	pal_res("continue", TKContinue),
+	pal_res("return", TKReturn),
+	pal_res("true", TKTrue),
+   	pal_res("false", TKFalse)
+]
 
 def palavra_reservada(lex):
     for pal in lista_pal:
@@ -104,7 +118,7 @@ def rec_equ(st):
             coluna += 1
             pos += 1
 
-            if c == ' ':
+            if c == ' ' or c == '\t':
                 posl -= 1
             elif c == '\n':
                 posl -= 1
@@ -169,7 +183,9 @@ def rec_equ(st):
 
         elif estado == 2:
             pos += 1
-            if c != '\'':
+			if c == '\n':
+				return TKErro
+            elif c != '\'':
                 return
             return TKString
 
@@ -191,7 +207,9 @@ def rec_equ(st):
 
         elif estado == 5:
             pos += 1
-            if c != '}':
+			if c == '%':
+				break
+            elif c != '}':
                 estado = 4
                 return
             return TKComentario
@@ -300,11 +318,11 @@ def rec_equ(st):
             return tk, lex
 
 #main
-with open("Untitled.m", 'r') as fp:
+with open("Entrada.m", 'r') as fp:
     characters = fp.read()
     fp.close()
 
-with open("saida.lex", "w") as nf:
+with open("Saida.lex", "w") as nf:
     linha = 1
     coluna = 0
     tk = True
@@ -322,4 +340,4 @@ with open("saida.lex", "w") as nf:
                 linha += 1
 
     nf.close()
-
+	print("Arquivo gerado com sucesso")
