@@ -78,9 +78,234 @@ struct pal_res lista_pal[] =
 	{ "continue", TKContinue },
 	{ "return", TKReturn },
 	{ "true", TKTrue },
-   	{ "false", TKFalse }, 	
+	{ "false", TKFalse },
 	{ "fimtabela", TKId }
 };
+
+void leToken()
+{
+
+}
+
+// WHILE -> while (COMP0) COMANDO END
+int	WHILE()
+{
+	if ("while") // tkWhile
+	{
+		leToken();
+		if ("(") // tkAbreParenteses
+		{
+			leToken();
+			if (COMP0())
+			{
+				if (")") // tkFechaParenteses
+				{
+					if (COMANDO())
+					{
+						if ("end") // tkEnd
+						{
+							return 1;
+						}
+						else { return 0; }
+					}
+					else { return 0; }
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
+int FOR()
+{
+	if ("for") // tkFor
+	{
+		leToken();
+		if ("(") // tkAbrePar
+		{
+			leToken();
+			if (ATRIB())
+			{
+				if (";") // tkPontoVirgula
+				{
+					leToken();
+					if (COMP0())
+					{
+						if (";") // tkPontoVirgula
+						{
+							leToken();
+							if (ATRIB())
+							{
+								if (COMANDO())
+								{
+									if ("end") // tkEnd
+									{
+										return 1;
+									}
+								}
+								else { return 0;  }
+							}
+							else { return 0; }
+						}
+						else { return 0; }
+					}
+					else { return 0; }
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
+int VAL()
+{
+	if (id())
+	{
+		return 1;
+	}
+	else if (cte())
+	{
+		return 1;
+	}
+	else if (EXP())
+	{
+		return 1;
+	}
+	else if (FUNCTION())
+	{
+		return 1;
+	}
+}
+
+int ATRIB()
+{
+	if (id())
+	{
+		if ("=") // tkAtrib
+		{
+			if (VAL())
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int COMANDO()
+{
+	if (COMANDO())
+	{
+		if (COMANDO())
+		{
+			return 1;
+		}
+		else if (";") // tk == TKPontoeVirg
+		{
+			leToken();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (ATRIB())
+	{
+		return 1;
+	}
+	else if (FOR())
+	{
+		return 1;
+	}
+	else if (WHILE())
+	{
+		return 1;
+	}
+	else if (SWITCH())
+	{
+		return 1;
+	}
+	else if (IF())
+	{
+		return 1;
+	}
+	else if (TRY())
+	{
+		return 1;
+	}
+	else if (PARFOR())
+	{
+		return 1;
+	}
+	else if (CRIAFUNCTION())
+	{
+		return 1;
+	}
+	else if (FUNCTION())
+	{
+		return 1;
+	}
+	else if ("break") // TKbreak
+	{
+		leToken();
+		return 1;
+	}
+	else if ("continue")
+	{
+		leToken();
+		return 1;
+	}
+	else if ("return")
+	{
+		if (VAL())
+		{
+			return 1;
+		}
+		else
+		{
+			leToken();
+			return 1;
+		}
+	}
+	else if (COMENTARIO())
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int INICIO()
+{
+	if (COMANDO())
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
 
 int palavra_reservada(char lex[])
 {
