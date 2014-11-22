@@ -87,6 +87,41 @@ void leToken()
 
 }
 
+int	ELSE()
+{
+	if ("else")
+	{
+		leToken();
+		if (COMANDO())
+		{
+			return 1;
+		}
+	}
+	else if ("elseif")
+	{
+		leToken();
+		if ("(")
+		{
+			leToken();
+			if (COMP0())
+			{
+				if (COMANDO())
+				{
+					if (ELSE())
+					{
+						return 1;
+					}
+					else { return 1; }
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
 int IF()
 {
 	if ("if") // TKIf
