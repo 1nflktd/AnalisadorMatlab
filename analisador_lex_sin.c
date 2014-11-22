@@ -87,7 +87,252 @@ void leToken()
 
 }
 
-// WHILE -> while (COMP0) COMANDO END
+int IF()
+{
+	if ("if") // TKIf
+	{
+		leToken();
+		if ("(")
+		{
+			leToken();
+			if (COMP0())
+			{
+				if (")")
+				{
+					leToken();
+					if (COMANDO())
+					{
+						if (ELSE())
+						{
+							if ("end")
+							{
+								leToken();
+								return 1;
+							}
+							else { return 0; }
+						}
+						else { return 0; }
+					}
+					else { return 0; }
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
+int COMENTARIO()
+{
+	if ("%") 
+	{
+		leToken();
+		if (string())
+		{
+			if ("\n")
+			{
+				leToken();
+				return 1;
+			}
+			else { return 0; }
+		}
+		else if ("{")
+		{
+			leToken();
+			if (string())
+			{
+				if ("}")
+				{
+					leToken();
+					if ("%")
+					{
+						leToken();
+						return 1;
+					}
+					else { return 0; }
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
+int TRY()
+{
+	if ("try") // TKTry
+	{
+		leToken();
+		if (COMANDO())
+		{
+			if ("catch")
+			{
+				leToken();
+				if (COMANDO())
+				{
+					if ("end") // TKEnd
+					{
+						leToken();
+						return 1;
+					}
+					else { return 0; }
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
+int CRIAFUNCTION()
+{
+	if ("function") // TKFunction
+	{
+		leToken();
+		if (FUNCTION())
+		{
+			if (COMANDO())
+			{
+				if ("end")
+				{
+					leToken();
+					return 1;
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
+int FUNCTION()
+{
+	if (id())
+	{
+		if ("(")
+		{
+			leToken();
+			if (PARAM0())
+			{
+				if (")")
+				{
+					leToken();
+					return 1;
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
+int PARFOR()
+{
+	if (ATRIB())
+	{
+		if (":") // 
+		{
+			leToken();
+			if (VAL())
+			{
+				if (";") // TKPontoEVirgula
+				{
+					leToken();
+					if (COMANDO())
+					{
+						if (";")
+						{
+							leToken();
+							if ("end") // TKEnd
+							{
+								return 1;
+							}
+							else { return 0; }
+						}
+						else { return 0; }
+					}
+					else { return 0; }
+				}
+				else { return 0; }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
+int CASE()
+{
+	if ("case") // TKCase
+	{
+		leToken();
+		if (cte())
+		{
+			if (COMANDO())
+			{
+				if (CASE())
+				{
+					return 1;
+				}
+				else
+				{
+					return 1;
+				}
+			}
+		}
+	} 
+	else if ("otherwise") // TKOtherwise
+ 	{
+		leToken();
+		if (COMANDO())
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int SWITCH()
+{
+	if ("switch") // TKSwitch
+	{
+		leToken();
+		if (id())
+		{
+			if (CASE())
+			{
+				if ("end") // TKEnd
+				{
+					leToken();
+					return 1;
+				}
+				else { return 0;  }
+			}
+			else { return 0; }
+		}
+		else { return 0; }
+	}
+	else { return 0; }
+}
+
 int	WHILE()
 {
 	if ("while") // tkWhile
