@@ -183,7 +183,8 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			else if (c == '\n')
 			{
 				lex[--posl] = '\0';
-				return TKComentario;
+				//return TKComentario;
+				estado = 0;
 			}
 			else
 			{
@@ -210,7 +211,8 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 				break;
 			}
 			lex[posl] = '\0';
-			return TKComentario;
+			//return TKComentario;
+			estado = 0;
 		case 6:
 			if (c != '\n')
 			{
@@ -218,7 +220,8 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 				break;
 			}
 			lex[--posl] = '\0';
-			return TKComentario;
+			//return TKComentario;
+			estado = 0;
 		case 7:
 			if (c >= '0' && c <= '9')
 			{
@@ -370,6 +373,44 @@ void leToken()
 	}
 }
 
+int VAL()
+{
+	if (id())
+	{
+		return 1;
+	} 
+	else if (cte()) 
+	{
+		return 1;
+	}
+	else if (EXP0())
+	{
+		return 1;
+	}
+	else if (FUNCTION())
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int ATRIB()
+{
+	if (id())
+	{
+		if (tk == TKAtrib)
+		{
+			if (VAL())
+			{
+				return 1;
+			}
+			return 0;
+		}
+		return 0;
+	}
+	return 0;
+} 
+
 int EXPFIM()
 {
 	if (tk == TKAbrePar)
@@ -382,15 +423,9 @@ int EXPFIM()
 				leToken();
 				return 1;
 			}
-			else
-			{
-				return 0;
-			}
-		}
-		else
-		{
 			return 0;
 		}
+		return 0;
 	}
 	else if (id())
 	{
@@ -400,10 +435,7 @@ int EXPFIM()
 	{
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP15()
@@ -415,19 +447,13 @@ int EXP15()
 		{
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
+		return 0;
 	}
 	else if (EXPFIM())
 	{
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP14()
@@ -437,31 +463,36 @@ int EXP14()
 		leToken();
 		if (EXP15())
 		{
-			EXP14();
+			if (tk == TKPotencia)
+			{
+				if (EXP14())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
 		return 0;
 	}
+	return 0;
 }
 
 int EXP13()
 {
 	if (EXP15())
 	{
-		EXP14();
+		if (tk == TKPotencia)
+		{
+			if (EXP14())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP12()
@@ -471,31 +502,36 @@ int EXP12()
 		leToken();
 		if (EXP13())
 		{
-			EXP12();
+			if (tk == TKEBinario)
+			{
+				if (EXP12())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
 		return 0;
 	}
+	return 0;
 }
 
 int EXP11()
 {
 	if (EXP13())
 	{
-		EXP12();
+		if (tk == TKEBinario)
+		{
+			if (EXP12())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP10()
@@ -505,31 +541,36 @@ int EXP10()
 		leToken();
 		if (EXP11())
 		{
-			EXP10();
+			if (tk == TKDivisao)
+			{
+				if (EXP10())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
 		return 0;
 	}
+	return 0;
 }
 
 int EXP9()
 {
 	if (EXP11())
 	{
-		EXP10();
+		if (tk == TKDivisao)
+		{
+			if (EXP10())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP8() 
@@ -539,31 +580,36 @@ int EXP8()
 		leToken();
 		if (EXP9())
 		{
-			EXP8();
+			if (tk == TKMultiplicacao)
+			{
+				if (EXP8())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
 		return 0;
 	}
+	return 0;
 }
 
 int EXP7()
 {
 	if (EXP9())
 	{
-		EXP8();
+		if (tk == TKMultiplicacao)
+		{
+			if (EXP8())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP6()
@@ -573,31 +619,36 @@ int EXP6()
 		leToken();
 		if (EXP7())
 		{
-			EXP6();
+			if (tk == TKOuBinario)
+			{
+				if (EXP6())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
 		return 0;
 	}
+	return 0;
 }
 
 int EXP5()
 {
 	if (EXP7())
 	{
-		EXP6();
+		if (tk == TKOuBinario)
+		{
+			if (EXP6())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP4()
@@ -607,31 +658,36 @@ int EXP4()
 		leToken();
 		if (EXP5())
 		{
-			EXP4();
+			if (tk == TKSubtracao)
+			{
+				if (EXP4())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
 		return 0;
 	}
+	return 0;
 }
 
 int EXP3()
 {
 	if (EXP5())
 	{
-		EXP4();
+		if (tk == TKSubtracao)
+		{
+			if (EXP4())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP2()
@@ -641,31 +697,36 @@ int EXP2()
 		leToken();
 		if (EXP3())
 		{
-			EXP2();
+			if (tk == TKSoma)
+			{
+				if (EXP2())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
 		return 0;
 	}
+	return 0;
 }
 
 int EXP1()
 {
-	if (EXP2())
+	if (EXP3())
 	{
-		EXP1();
+		if (tk == TKSoma)
+		{
+			if (EXP2())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int EXP0()
@@ -763,7 +824,14 @@ int COMP3()
 		leToken();
 		if (COMP4())
 		{
-			COMP3();
+			if (tk == TKELogico)
+			{
+				if (COMP3())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
 		else
@@ -781,7 +849,14 @@ int COMP2()
 {
 	if (COMP4())
 	{
-		COMP3();
+		if (tk == TKELogico)
+		{
+			if (COMP3())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
 	else
@@ -797,7 +872,14 @@ int COMP1()
 		leToken();
 		if (COMP2())
 		{
-			COMP1();
+			if (tk == TKOuLogico)
+			{
+				if (COMP1())
+				{
+					return 1;
+				}
+				return 0;
+			}
 			return 1;
 		}
 		else
@@ -815,7 +897,14 @@ int COMP0()
 {
 	if (COMP2())
 	{
-		COMP1();
+        if (tk == TKOuLogico) 
+        {
+			if (COMP1())
+			{
+				return 1;
+			}
+			return 0;
+        }
 		return 1;
 	}
 	else
@@ -896,43 +985,13 @@ int IF()
 	else { return 0; }
 }
 
-//????   como faze essa porra
 int COMENTARIO()
 {
-	if ("%")
+	if (tk == TKComentario)
 	{
 		leToken();
-		if (string())
-		{
-			if ('\n')
-			{
-				leToken();
-				return 1;
-			}
-			else { return 0; }
-		}
-		else if (tk == TKAbreChave)
-		{
-			leToken();
-			if (string())
-			{
-				if (tk == TKFechaChave)
-				{
-					leToken();
-					if ("%")
-					{
-						leToken();
-						return 1;
-					}
-					else { return 0; }
-				}
-				else { return 0; }
-			}
-			else { return 0; }
-		}
-		else { return 0; }
-	}
-	else { return 0; }
+    	return 1;
+    }
 	return 0;
 }
 
@@ -1140,46 +1199,50 @@ int	WHILE()
 
 int FOR()
 {
-	if (tk == TKFor) // tkFor
+	if (tk == TKFor)
 	{
 		leToken();
-		if (tk == TKAbrePar) // tkAbrePar
+		id (id())
 		{
-			leToken();
-			if (ATRIB())
+			if (tk == TKAtrib)
 			{
-				if (tk == TKPontoeVirg) // tkPontoVirgula
+				leToken();
+				if (VAL())
 				{
-					leToken();
-					if (COMP0())
+					if (tk == TKDoisPontos)
 					{
-						if (tk == TKPontoeVirg) // tkPontoVirgula
+						leToken();
+						if (VAL())
 						{
-							leToken();
-							if (ATRIB())
+							if (tk == TKDoisPontos)
 							{
-								if (COMANDO())
+								if (!VAL())
 								{
-									if (tk == TKEnd) // tkEnd
-									{
-										return 1;
-									}
+									return 0;
 								}
-								else { return 0; }
 							}
-							else { return 0; }
-						}
-						else { return 0; }
+							if (BLOCO())
+							{
+								if (tk == TKEnd)
+								{
+									leToken();
+									return 1;
+								}
+								return 0;
+							}
+							return 0;
+						}						
+						return 0;
 					}
-					else { return 0; }
+					return 0;
 				}
-				else { return 0; }
+				return 0;
 			}
-			else { return 0; }
+			return 0;
 		}
-		else { return 0; }
+		return 0;
 	}
-	else { return 0; }
+	return 0;
 }
 
 int VAL()
