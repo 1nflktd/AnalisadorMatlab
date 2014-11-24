@@ -52,6 +52,7 @@
 #define TKTrue 46
 #define TKFalse 47
 #define TKDoisPontos 48
+#define TKNegacao 49
 
 int pos = 0;
 
@@ -290,6 +291,10 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 				lex[posl] = '\0';
 				return TKDiferente;
 			}
+			else
+			{
+				return TKNegacao;
+			}
 			break;
 		case 10:
 			if (c == '=')
@@ -362,6 +367,460 @@ void leToken()
 		coluna += strlen(lex) - 1;
 		if (lex[strlen(lex) - 1] == '\n')
 			linha++;
+	}
+}
+
+int EXPFIM()
+{
+	if (tk == TKAbrePar)
+	{
+		leToken();
+		if (EXP1())
+		{
+			if (tk == TKFechaPar)
+			{
+				leToken();
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (id())
+	{
+		return 1;
+	}
+	else if (cte())
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP15()
+{
+	if (tk == TKSubtracao)
+	{
+		leToken();
+		if (EXPFIM())
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (EXPFIM())
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP14()
+{
+	if (tk == TKPotencia)
+	{
+		leToken();
+		if (EXP15())
+		{
+			EXP14();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP13()
+{
+	if (EXP15())
+	{
+		EXP14();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP12()
+{
+	if (tk == TKEBinario)
+	{
+		leToken();
+		if (EXP13())
+		{
+			EXP12();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP11()
+{
+	if (EXP13())
+	{
+		EXP12();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP10()
+{
+	if (tk == TKDivisao)
+	{
+		leToken();
+		if (EXP11())
+		{
+			EXP10();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP9()
+{
+	if (EXP11())
+	{
+		EXP10();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP8() 
+{
+	if (tk == TKMultiplicacao)
+	{
+		leToken();
+		if (EXP9())
+		{
+			EXP8();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP7()
+{
+	if (EXP9())
+	{
+		EXP8();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP6()
+{
+	if (tk == TKOuBinario)
+	{
+		leToken();
+		if (EXP7())
+		{
+			EXP6();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP5()
+{
+	if (EXP7())
+	{
+		EXP6();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP4()
+{
+	if (tk == TKSubtracao)
+	{
+		leToken();
+		if (EXP5())
+		{
+			EXP4();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP3()
+{
+	if (EXP5())
+	{
+		EXP4();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP2()
+{
+	if (tk == TKSoma)
+	{
+		leToken();
+		if (EXP3())
+		{
+			EXP2();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP1()
+{
+	if (EXP2())
+	{
+		EXP1();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int EXP0()
+{
+	if (COMP0())
+	{
+		return 1;
+	}
+	else if (EXP1())
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int COMP5()
+{
+	if (tk == TKAbrePar)
+	{
+		leToken();
+		if (COMP0())
+		{
+			if (tk == TKFechaPar)
+			{
+				leToken();
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (EXP1())
+	{
+		if (tk == TKMaior || tk == TKMaiorIgual || tk == TKMenor || tk == TKMenorIgual || 
+			tk == TKIgual || tk == TKDiferente)
+		{
+			leToken();
+			if (EXP1())
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int COMP4()
+{
+	if (tk == TKNegacao)
+	{
+		leToken();
+		if (COMP5())
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else if (COMP5())
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int COMP3()
+{
+	if (tk == TKELogico)
+	{
+		leToken();
+		if (COMP4())
+		{
+			COMP3();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int COMP2()
+{
+	if (COMP4())
+	{
+		COMP3();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int COMP1()
+{
+	if (tk == TKOuLogico)
+	{
+		leToken();
+		if (COMP2())
+		{
+			COMP1();
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int COMP0()
+{
+	if (COMP2())
+	{
+		COMP1();
+		return 1;
+	}
+	else
+	{
+		return 0;
 	}
 }
 
@@ -440,7 +899,7 @@ int IF()
 //????   como faze essa porra
 int COMENTARIO()
 {
-	if ("%") 
+	if ("%")
 	{
 		leToken();
 		if (string())
@@ -606,9 +1065,9 @@ int CASE()
 				}
 			}
 		}
-	} 
+	}
 	else if (tk == TKOtherwise) // TKOtherwise
- 	{
+	{
 		leToken();
 		if (COMANDO())
 		{
@@ -639,7 +1098,7 @@ int SWITCH()
 					leToken();
 					return 1;
 				}
-				else { return 0;  }
+				else { return 0; }
 			}
 			else { return 0; }
 		}
@@ -706,7 +1165,7 @@ int FOR()
 										return 1;
 									}
 								}
-								else { return 0;  }
+								else { return 0; }
 							}
 							else { return 0; }
 						}
@@ -771,23 +1230,7 @@ int ATRIB()
 
 int COMANDO()
 {
-	if (COMANDO())
-	{
-		if (COMANDO())
-		{
-			return 1;
-		}
-		else if (tk == TKPontoeVirg) // tk == TKPontoeVirg
-		{
-			leToken();
-			return 1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else if (ATRIB())
+	if (ATRIB())
 	{
 		return 1;
 	}
@@ -855,9 +1298,26 @@ int COMANDO()
 	}
 }
 
-int INICIO()
+int BLOCO()
 {
 	if (COMANDO())
+	{
+		if (tk == TKPontoeVirg)
+		{
+			leToken();
+		}
+		BLOCO();
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int INICIO()
+{
+	if (BLOCO())
 	{
 		return 1;
 	}
@@ -915,7 +1375,7 @@ int main()
 		getchar();
 		exit(1);
 	}
-	
+
 	do
 	{
 		leToken();
@@ -928,17 +1388,17 @@ int main()
 
 	/*while ((tk = rec_equ(characters, lex, &linha, &coluna)) != TKFim)
 	{
-		if (tk == TKErro)
-		{
-			printf("Ocorreu um erro lexico!\n");
-			break;
-		}
+	if (tk == TKErro)
+	{
+	printf("Ocorreu um erro lexico!\n");
+	break;
+	}
 
-		printf("Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
-		fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
-		coluna += strlen(lex) - 1;
-		if (lex[strlen(lex) - 1] == '\n')
-			linha++;
+	printf("Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
+	fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
+	coluna += strlen(lex) - 1;
+	if (lex[strlen(lex) - 1] == '\n')
+	linha++;
 	}*/
 
 	fclose(newFile);
