@@ -16,7 +16,6 @@ COMANDO -> break
 COMANDO -> continue
 COMANDO -> return
 COMANDO -> return VAL
-COMANDO -> COMENTARIO
 COMP0 -> COMP2 COMP1
 COMP0 -> COMP2
 COMP1 -> || COMP2 COMP1
@@ -74,11 +73,10 @@ VAL -> id
 VAL -> cte
 VAL -> EXP0
 VAL -> FUNCTION
-FOR -> for (ATRIB; COMP0; ATRIB) BLOCO end
+FOR -> for id = VAL : VAL BLOCO end
+FOR -> for id = VAL : VAL : VAL BLOCO end
 WHILE -> while (COMP0) BLOCO end
 TRY -> try BLOCO catch BLOCO end
-COMENTARIO -> % string \n
-COMENTARIO -> %{ string }%
 IF -> if (COMP0) BLOCO ELSE end
 ELSE -> else BLOCO
 ELSE -> elseif (COMP0) BLOCO ELSE
