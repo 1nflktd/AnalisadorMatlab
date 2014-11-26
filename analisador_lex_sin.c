@@ -89,6 +89,20 @@ int linha = 1, coluna = 0;
 char* characters;
 FILE * newFile;
 
+int palavra_reservada(char lex[])
+{
+	int postab = 0;
+	while (strcmp("fimtabela", lista_pal[postab].palavra) != 0)
+	{
+		if (strcmp(lex, lista_pal[postab].palavra) == 0)
+		{
+			return lista_pal[postab].tk;
+		}
+		postab++;
+	}
+	return TKId;
+}
+
 int rec_equ(char st[], char lex[], int * linha, int * coluna)
 {
 	int estado = 0,
@@ -357,38 +371,65 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 void leToken()
 {
 	char lex[200];
-	while ((tk = rec_equ(characters, lex, &linha, &coluna)) != TKFim)
-	{
+	//while ((tk = rec_equ(characters, lex, &linha, &coluna)) != TKFim)
+	//{
+		tk = rec_equ(characters, lex, &linha, &coluna);
 		if (tk == TKErro)
 		{
 			printf("Ocorreu um erro lexico!\n");
 			return;
 		}
 
-		printf("Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
+		//printf("Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
 		fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
 		coluna += strlen(lex) - 1;
 		if (lex[strlen(lex) - 1] == '\n')
 			linha++;
-	}
+	//}
 }
 
-int VAL()
+int EXP0();
+int FUNCTION();
+int EXP1();
+int COMP0();
+int BLOCO();
+int VAL();
+
+int id()
 {
-	if (id())
+	if (tk == TKId)
 	{
-		return 1;
-	} 
-	else if (cte()) 
-	{
+		leToken();
 		return 1;
 	}
-	else if (EXP0())
+	return 0;
+}
+
+int cte()
+{
+	if (tk == TKConstanteInteira)
 	{
+		leToken();
 		return 1;
 	}
-	else if (FUNCTION())
+	else if (tk == TKConstanteReal)
 	{
+		leToken();
+		return 1;
+	}
+	else if (tk == TKString)
+	{
+		leToken();
+		return 1;
+	}
+	else if (tk == TKTrue)
+	{
+		leToken();
+		return 1;
+	}
+	else if (tk == TKFalse)
+	{
+		leToken();
 		return 1;
 	}
 	return 0;
@@ -409,7 +450,7 @@ int ATRIB()
 		return 0;
 	}
 	return 0;
-} 
+}
 
 int EXPFIM()
 {
@@ -573,7 +614,7 @@ int EXP9()
 	return 0;
 }
 
-int EXP8() 
+int EXP8()
 {
 	if (tk == TKMultiplicacao)
 	{
@@ -769,7 +810,7 @@ int COMP5()
 	}
 	else if (EXP1())
 	{
-		if (tk == TKMaior || tk == TKMaiorIgual || tk == TKMenor || tk == TKMenorIgual || 
+		if (tk == TKMaior || tk == TKMaiorIgual || tk == TKMenor || tk == TKMenorIgual ||
 			tk == TKIgual || tk == TKDiferente)
 		{
 			leToken();
@@ -787,10 +828,11 @@ int COMP5()
 			return 0;
 		}
 	}
-	else
+	else if (VAL())
 	{
-		return 0;
+		return 1;
 	}
+	return 0;
 }
 
 int COMP4()
@@ -897,14 +939,14 @@ int COMP0()
 {
 	if (COMP2())
 	{
-        if (tk == TKOuLogico) 
-        {
+		if (tk == TKOuLogico)
+		{
 			if (COMP1())
 			{
 				return 1;
 			}
 			return 0;
-        }
+		}
 		return 1;
 	}
 	else
@@ -918,7 +960,7 @@ int	ELSE()
 	if (tk == TKElse)
 	{
 		leToken();
-		if (COMANDO())
+		if (BLOCO())
 		{
 			return 1;
 		}
@@ -931,13 +973,22 @@ int	ELSE()
 			leToken();
 			if (COMP0())
 			{
-				if (COMANDO())
+				if (tk == TKFechaPar)
 				{
-					if (ELSE())
+					leToken();
+					if (BLOCO())
 					{
+						if (tk == TKElse || tk == TKElseIf)
+						{
+							if (ELSE())
+							{
+								return 1;
+							}
+							return 0;
+						}
 						return 1;
 					}
-					else { return 1; }
+					return 0;
 				}
 				else { return 0; }
 			}
@@ -950,7 +1001,7 @@ int	ELSE()
 
 int IF()
 {
-	if (tk == TKIf) // TKIf
+	if (tk == TKIf) 
 	{
 		leToken();
 		if (tk == TKAbrePar)
@@ -961,7 +1012,7 @@ int IF()
 				if (tk == TKFechaPar)
 				{
 					leToken();
-					if (COMANDO())
+					if (BLOCO())
 					{
 						if (ELSE())
 						{
@@ -990,8 +1041,8 @@ int COMENTARIO()
 	if (tk == TKComentario)
 	{
 		leToken();
-    	return 1;
-    }
+		return 1;
+	}
 	return 0;
 }
 
@@ -1000,12 +1051,12 @@ int TRY()
 	if (tk == TKTry) // TKTry
 	{
 		leToken();
-		if (COMANDO())
+		if (BLOCO())
 		{
 			if (tk == TKCatch)
 			{
 				leToken();
-				if (COMANDO())
+				if (BLOCO())
 				{
 					if (tk == TKEnd) // TKEnd
 					{
@@ -1025,12 +1076,12 @@ int TRY()
 
 int CRIAFUNCTION()
 {
-	if (tk == TKFunction) // TKFunction
+	if (tk == TKFunction)
 	{
 		leToken();
 		if (FUNCTION())
 		{
-			if (COMANDO())
+			if (BLOCO())
 			{
 				if (tk == TKEnd)
 				{
@@ -1044,6 +1095,54 @@ int CRIAFUNCTION()
 		else { return 0; }
 	}
 	else { return 0; }
+}
+
+int PARAM2()
+{
+	if (VAL())
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int PARAM1()
+{
+	if (tk == TKVirgula)
+	{
+		leToken();
+		if (PARAM2())
+		{
+			if (tk == TKVirgula)
+			{
+				if (PARAM1())
+				{
+					return 1;
+				}
+				return 0;
+			}
+			return 1;
+		}
+		return 0;
+	}
+	return 0;
+}
+
+int PARAM0()
+{
+	if (PARAM2())
+	{
+		if (tk == TKVirgula)
+		{
+			if (PARAM1())
+			{
+				return 1;
+			}
+			return 0;
+		}
+		return 1;
+	}
+	return 0;
 }
 
 int FUNCTION()
@@ -1073,20 +1172,20 @@ int PARFOR()
 {
 	if (ATRIB())
 	{
-		if (tk == TKDoisPontos) // 
+		if (tk == TKDoisPontos)
 		{
 			leToken();
 			if (VAL())
 			{
-				if (tk == TKPontoeVirg) // TKPontoEVirgula
+				if (tk == TKPontoeVirg)
 				{
 					leToken();
-					if (COMANDO())
+					if (BLOCO())
 					{
 						if (tk == TKPontoeVirg)
 						{
 							leToken();
-							if (tk == TKEnd) // TKEnd
+							if (tk == TKEnd)
 							{
 								return 1;
 							}
@@ -1105,42 +1204,98 @@ int PARFOR()
 	else { return 0; }
 }
 
+int CASEVALUE2()
+{
+	if (cte())
+	{
+		if (tk == TKVirgula)
+		{
+			leToken();
+			if (CASEVALUE2())
+			{
+				return 1;
+			}
+			return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+int CASEVALUE1()
+{
+	if (cte())
+	{
+		if (tk == TKVirgula)
+		{
+			leToken();
+			if (CASEVALUE2())
+			{
+				return 1;
+			}
+			return 0;
+		}
+		return 0;
+	}
+	return 0;
+}
+
+int CASEVALUE0()
+{
+	if (cte())
+	{
+		return 1;
+	}
+	else if (tk == TKAbreChave)
+	{
+		leToken();
+		if (CASEVALUE1())
+		{
+			if (tk == TKFechaChave)
+			{
+				leToken();
+				return 1;
+			}
+			return 0;
+		}
+		return 0;
+	}
+	return 0;
+}
+
 int CASE()
 {
 	if (tk == TKCase) // TKCase
 	{
 		leToken();
-		if (cte())
+		if (CASEVALUE0())
 		{
-			if (COMANDO())
+			if (BLOCO())
 			{
-				if (CASE())
+				if (tk == TKCase || tk == TKOtherwise)
 				{
-					return 1;
+					if (CASE())
+					{
+						return 1;
+					}
+					return 0;
 				}
-				else
-				{
-					return 1;
-				}
+				return 1;
 			}
+			return 0;
 		}
+		return 0;
 	}
 	else if (tk == TKOtherwise) // TKOtherwise
 	{
 		leToken();
-		if (COMANDO())
+		if (BLOCO())
 		{
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
 		return 0;
 	}
+	return 0;
 }
 
 int SWITCH()
@@ -1168,19 +1323,19 @@ int SWITCH()
 
 int	WHILE()
 {
-	if (tk == TKWhile) // tkWhile
+	if (tk == TKWhile)
 	{
 		leToken();
-		if (tk == TKAbrePar) // tkAbreParenteses
+		if (tk == TKAbrePar) 
 		{
 			leToken();
 			if (COMP0())
 			{
-				if (tk == TKFechaPar) // tkFechaParenteses
+				if (tk == TKFechaPar)
 				{
-					if (COMANDO())
+					if (BLOCO())
 					{
-						if (tk == TKEnd) // tkEnd
+						if (tk == TKEnd)
 						{
 							return 1;
 						}
@@ -1202,7 +1357,7 @@ int FOR()
 	if (tk == TKFor)
 	{
 		leToken();
-		id (id())
+		if (id())
 		{
 			if (tk == TKAtrib)
 			{
@@ -1231,7 +1386,7 @@ int FOR()
 								return 0;
 							}
 							return 0;
-						}						
+						}
 						return 0;
 					}
 					return 0;
@@ -1255,7 +1410,7 @@ int VAL()
 	{
 		return 1;
 	}
-	else if (EXP())
+	else if (EXP0())
 	{
 		return 1;
 	}
@@ -1263,32 +1418,7 @@ int VAL()
 	{
 		return 1;
 	}
-}
-
-int ATRIB()
-{
-	if (id())
-	{
-		if (tk == TKAtrib) // tkAtrib
-		{
-			if (VAL())
-			{
-				return 1;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int COMANDO()
@@ -1329,7 +1459,7 @@ int COMANDO()
 	{
 		return 1;
 	}
-	else if (tk == TKBreak) // TKbreak
+	else if (tk == TKBreak)
 	{
 		leToken();
 		return 1;
@@ -1341,18 +1471,11 @@ int COMANDO()
 	}
 	else if (tk == TKReturn)
 	{
+		leToken();
 		if (VAL())
 		{
 			return 1;
 		}
-		else
-		{
-			leToken();
-			return 1;
-		}
-	}
-	else if (COMENTARIO())
-	{
 		return 1;
 	}
 	else
@@ -1390,20 +1513,6 @@ int INICIO()
 	}
 }
 
-int palavra_reservada(char lex[])
-{
-	int postab = 0;
-	while (strcmp("fimtabela", lista_pal[postab].palavra) != 0)
-	{
-		if (strcmp(lex, lista_pal[postab].palavra) == 0)
-		{
-			return lista_pal[postab].tk;
-		}
-		postab++;
-	}
-	return TKId;
-}
-
 int main()
 {
 	int i = 0;
@@ -1438,14 +1547,14 @@ int main()
 		getchar();
 		exit(1);
 	}
-
+	
 	do
 	{
 		leToken();
 		if (!INICIO())
 		{
-			printf("Erro");
-			return 0;
+			printf("TOKEN %d\n", tk);
+			printf("Erro\n");
 		}
 	} while (tk != TKFim);
 
@@ -1467,7 +1576,8 @@ int main()
 	fclose(newFile);
 
 	printf("Arquivo gerado com sucesso!");
+	
 	getchar();
-	//system("pause");
+	system("pause");
 	return 0;
 }
