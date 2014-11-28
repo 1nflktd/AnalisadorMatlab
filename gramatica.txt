@@ -16,6 +16,7 @@ COMANDO -> break
 COMANDO -> continue
 COMANDO -> return
 COMANDO -> return VAL
+COMANDO -> COMENTARIO
 COMP0 -> COMP2 COMP1
 COMP0 -> COMP2
 COMP1 -> || COMP2 COMP1
@@ -33,9 +34,8 @@ COMP5 -> EXP1 < EXP1
 COMP5 -> EXP1 <= EXP1
 COMP5 -> EXP1 == EXP1
 COMP5 -> EXP1 ~= EXP1
-COMP5 -> VAL
-EXP0 -> COMP0
-EXP0 -> EXP1
+COMP5 -> EXP1
+
 EXP1 -> EXP3 EXP2
 EXP1 -> EXP3
 EXP2 -> + EXP3 EXP2
@@ -72,12 +72,13 @@ EXPFIM -> cte
 ATRIB -> id = VAL
 VAL -> id
 VAL -> cte
-VAL -> EXP0
+VAL -> COMP0
 VAL -> FUNCTION
-FOR -> for id = VAL : VAL BLOCO end
-FOR -> for id = VAL : VAL : VAL BLOCO end
+FOR -> for (ATRIB; COMP0; ATRIB) BLOCO end
 WHILE -> while (COMP0) BLOCO end
 TRY -> try BLOCO catch BLOCO end
+COMENTARIO -> % string \n
+COMENTARIO -> %{ string }%
 IF -> if (COMP0) BLOCO ELSE end
 ELSE -> else BLOCO
 ELSE -> elseif (COMP0) BLOCO ELSE
