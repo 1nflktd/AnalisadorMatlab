@@ -54,7 +54,7 @@
 #define TKDoisPontos 48
 #define TKNegacao 49
 
-int pos = 0;
+int pos = 0, ultPos = -1;
 
 struct pal_res{
 	char palavra[20];
@@ -380,11 +380,16 @@ void leToken()
 			return;
 		}
 
+		if (pos > ultPos)
+		{
+			ultPos = pos;
+			fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
+			coluna += strlen(lex) - 1;
+			if (lex[strlen(lex) - 1] == '\n')
+				linha++;
+		}
 		//printf("Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
-		fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
-		coluna += strlen(lex) - 1;
-		if (lex[strlen(lex) - 1] == '\n')
-			linha++;
+		
 	//}
 }
 
@@ -412,22 +417,22 @@ int cte()
 		leToken();
 		return 1;
 	}
-	else if (tk == TKConstanteReal)
+	if (tk == TKConstanteReal)
 	{
 		leToken();
 		return 1;
 	}
-	else if (tk == TKString)
+	if (tk == TKString)
 	{
 		leToken();
 		return 1;
 	}
-	else if (tk == TKTrue)
+	if (tk == TKTrue)
 	{
 		leToken();
 		return 1;
 	}
-	else if (tk == TKFalse)
+	if (tk == TKFalse)
 	{
 		leToken();
 		return 1;
@@ -441,6 +446,7 @@ int ATRIB()
 	{
 		if (tk == TKAtrib)
 		{
+			leToken();
 			if (VAL())
 			{
 				return 1;
@@ -770,22 +776,6 @@ int EXP1()
 	return 0;
 }
 
-int EXP0()
-{
-	if (COMP0())
-	{
-		return 1;
-	}
-	else if (EXP1())
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
 int COMP5()
 {
 	if (tk == TKAbrePar)
@@ -808,7 +798,7 @@ int COMP5()
 			return 0;
 		}
 	}
-	else if (EXP1())
+	if (EXP1())
 	{
 		if (tk == TKMaior || tk == TKMaiorIgual || tk == TKMenor || tk == TKMenorIgual ||
 			tk == TKIgual || tk == TKDiferente)
@@ -818,18 +808,8 @@ int COMP5()
 			{
 				return 1;
 			}
-			else
-			{
-				return 0;
-			}
-		}
-		else
-		{
 			return 0;
 		}
-	}
-	else if (VAL())
-	{
 		return 1;
 	}
 	return 0;
@@ -1333,10 +1313,12 @@ int	WHILE()
 			{
 				if (tk == TKFechaPar)
 				{
+					leToken();	
 					if (BLOCO())
 					{
 						if (tk == TKEnd)
 						{
+							leToken();
 							return 1;
 						}
 						else { return 0; }
@@ -1402,19 +1384,23 @@ int FOR()
 
 int VAL()
 {
+	int marcaPos = pos;
+	if (FUNCTION())
+	{
+		return 1;
+	}
+	pos = marcaPos;
+	if (COMP0())
+	{
+		return 1;
+	}
+	pos = marcaPos;
 	if (id())
 	{
 		return 1;
 	}
-	else if (cte())
-	{
-		return 1;
-	}
-	else if (EXP0())
-	{
-		return 1;
-	}
-	else if (FUNCTION())
+	pos = marcaPos;
+	if (cte())
 	{
 		return 1;
 	}
@@ -1423,43 +1409,53 @@ int VAL()
 
 int COMANDO()
 {
+	int marcaPos = pos;
 	if (ATRIB())
 	{
 		return 1;
 	}
-	else if (FOR())
+	pos = marcaPos;
+	if (FOR())
 	{
 		return 1;
 	}
-	else if (WHILE())
+	pos = marcaPos;
+	if (WHILE())
 	{
 		return 1;
 	}
-	else if (SWITCH())
+	pos = marcaPos;
+	if (SWITCH())
 	{
 		return 1;
 	}
-	else if (IF())
+	pos = marcaPos;
+	if (IF())
 	{
 		return 1;
 	}
-	else if (TRY())
+	pos = marcaPos;
+	if (TRY())
 	{
 		return 1;
 	}
-	else if (PARFOR())
+	pos = marcaPos;
+	if (PARFOR())
 	{
 		return 1;
 	}
-	else if (CRIAFUNCTION())
+	pos = marcaPos;
+	if (CRIAFUNCTION())
 	{
 		return 1;
 	}
-	else if (FUNCTION())
+	pos = marcaPos;
+	if (FUNCTION())
 	{
 		return 1;
 	}
-	else if (tk == TKBreak)
+	pos = marcaPos;
+	if (tk == TKBreak)
 	{
 		leToken();
 		return 1;
@@ -1478,10 +1474,7 @@ int COMANDO()
 		}
 		return 1;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 int BLOCO()
@@ -1520,7 +1513,7 @@ int main()
 	size_t space = 1;
 	characters = (char *)malloc(space);
 
-	FILE * fp = fopen("Entrada.m", "r");
+	FILE * fp = fopen("C://Entrada.m", "r");
 
 	if (fp == NULL)
 	{
