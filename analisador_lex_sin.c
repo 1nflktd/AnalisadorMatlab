@@ -54,8 +54,6 @@
 #define TKDoisPontos 48
 #define TKNegacao 49
 
-int pos = 0, ultPos = -1;
-
 struct pal_res{
 	char palavra[20];
 	int tk;
@@ -84,10 +82,20 @@ struct pal_res lista_pal[] =
 	{ "fimtabela", TKId }
 };
 
+struct token {
+	int tk;
+	int linha;
+	int coluna;
+};
+
+
 int tk;
 int linha = 1, coluna = 0;
 char* characters;
+struct token* tokens;
+int pos = 0, posTK = -1, ultPosTK = -1;
 FILE * newFile;
+size_t space = 1;
 
 int palavra_reservada(char lex[])
 {
@@ -371,26 +379,80 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 void leToken()
 {
 	char lex[200];
-	//while ((tk = rec_equ(characters, lex, &linha, &coluna)) != TKFim)
-	//{
+
+	posTK++;
+	if (posTK > ultPosTK)
+	{
 		tk = rec_equ(characters, lex, &linha, &coluna);
 		if (tk == TKErro)
 		{
-			printf("Ocorreu um erro lexico!\n");
+			printf("Token desconhecido!\tLinha: %d\tColuna: %d\n");
 			return;
 		}
 
-		if (pos > ultPos)
+		ultPosTK = posTK;
+		tokens = (struct token *)realloc(tokens, sizeof(struct token) * space);
+		tokens[posTK].tk = tk;
+		tokens[posTK].linha = linha;
+		tokens[posTK].coluna = coluna;
+		fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
+		coluna += strlen(lex) - 1;
+		if (lex[strlen(lex) - 1] == '\n')
 		{
-			ultPos = pos;
-			fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
-			coluna += strlen(lex) - 1;
-			if (lex[strlen(lex) - 1] == '\n')
-				linha++;
+			linha++;
 		}
-		//printf("Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
-		
-	//}
+	}
+	else
+	{
+		tk = tokens[posTK].tk;
+	}
+}
+
+void msgErro(char* msg)
+{
+	printf("Erro\n");
+	printf("%s \tLinha: %d \tColuna: %d\n", msg, tokens[posTK].linha, tokens[posTK].coluna);
+}
+
+void erroAbrePar()
+{
+	msgErro("Parenteses esperado!");
+}
+
+void erroFechaPar()
+{
+	msgErro("Faltou fechar os parenteses!");
+}
+
+void erroExpInvalida()
+{
+	msgErro("Expressao invalida!");
+}
+
+void erroEnd()
+{
+	msgErro("END esperado!");
+}
+
+void erroVal()
+{
+	msgErro("Falta informar o valor!");
+}
+
+void erroDoisPt()
+{
+	msgErro("Dois pontos esperado!!");
+}
+
+void voltaPos(int posicao)
+{
+	posTK = posicao;
+	tk = tokens[posTK].tk;
+}
+
+int setPos()
+{
+	return posTK;
 }
 
 int EXP0();
@@ -451,6 +513,7 @@ int ATRIB()
 			{
 				return 1;
 			}
+			erroVal();
 			return 0;
 		}
 		return 0;
@@ -470,15 +533,23 @@ int EXPFIM()
 				leToken();
 				return 1;
 			}
+			erroFechaPar();
 			return 0;
 		}
 		return 0;
 	}
-	else if (id())
+	int marcaPos = setPos();
+	if (id())
 	{
 		return 1;
 	}
-	else if (cte())
+	voltaPos(marcaPos);
+	if (cte())
+	{
+		return 1;
+	}
+	voltaPos(marcaPos);
+	if (FUNCTION())
 	{
 		return 1;
 	}
@@ -494,6 +565,7 @@ int EXP15()
 		{
 			return 1;
 		}
+		erroExpInvalida();
 		return 0;
 	}
 	else if (EXPFIM())
@@ -520,6 +592,7 @@ int EXP14()
 			}
 			return 1;
 		}
+		erroExpInvalida();
 		return 0;
 	}
 	return 0;
@@ -559,6 +632,7 @@ int EXP12()
 			}
 			return 1;
 		}
+		erroExpInvalida();
 		return 0;
 	}
 	return 0;
@@ -598,6 +672,7 @@ int EXP10()
 			}
 			return 1;
 		}
+		erroExpInvalida();
 		return 0;
 	}
 	return 0;
@@ -637,6 +712,7 @@ int EXP8()
 			}
 			return 1;
 		}
+		erroExpInvalida();
 		return 0;
 	}
 	return 0;
@@ -676,6 +752,7 @@ int EXP6()
 			}
 			return 1;
 		}
+		erroExpInvalida();
 		return 0;
 	}
 	return 0;
@@ -715,6 +792,7 @@ int EXP4()
 			}
 			return 1;
 		}
+		erroExpInvalida();
 		return 0;
 	}
 	return 0;
@@ -754,6 +832,7 @@ int EXP2()
 			}
 			return 1;
 		}
+		erroExpInvalida();
 		return 0;
 	}
 	return 0;
@@ -788,15 +867,10 @@ int COMP5()
 				leToken();
 				return 1;
 			}
-			else
-			{
-				return 0;
-			}
-		}
-		else
-		{
+			erroFechaPar();
 			return 0;
 		}
+		return 0;
 	}
 	if (EXP1())
 	{
@@ -808,6 +882,7 @@ int COMP5()
 			{
 				return 1;
 			}
+			erroExpInvalida();
 			return 0;
 		}
 		return 1;
@@ -824,10 +899,8 @@ int COMP4()
 		{
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
+		erroExpInvalida();
+		return 0;
 	}
 	else if (COMP5())
 	{
@@ -856,10 +929,8 @@ int COMP3()
 			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
+		erroExpInvalida();
+		return 0;
 	}
 	else
 	{
@@ -904,10 +975,9 @@ int COMP1()
 			}
 			return 1;
 		}
-		else
-		{
-			return 0;
-		}
+		erroExpInvalida();
+		return 0;
+
 	}
 	else
 	{
@@ -970,18 +1040,20 @@ int	ELSE()
 					}
 					return 0;
 				}
-				else { return 0; }
+				erroFechaPar();
+				return 0;
 			}
-			else { return 0; }
+			erroAbrePar();
+			return 0;
 		}
-		else { return 0; }
+		return 0;
 	}
-	else { return 0; }
+	return 0;
 }
 
 int IF()
 {
-	if (tk == TKIf) 
+	if (tk == TKIf)
 	{
 		leToken();
 		if (tk == TKAbrePar)
@@ -1001,34 +1073,27 @@ int IF()
 								leToken();
 								return 1;
 							}
-							else { return 0; }
+							erroEnd();
+							return 0;
 						}
-						else { return 0; }
+						return 0;
 					}
-					else { return 0; }
+					return 0;
 				}
-				else { return 0; }
+				erroFechaPar();
+				return 0;
 			}
-			else { return 0; }
+			return 0;
 		}
-		else { return 0; }
-	}
-	else { return 0; }
-}
-
-int COMENTARIO()
-{
-	if (tk == TKComentario)
-	{
-		leToken();
-		return 1;
+		erroAbrePar();
+		return 0;
 	}
 	return 0;
 }
 
 int TRY()
 {
-	if (tk == TKTry) // TKTry
+	if (tk == TKTry)
 	{
 		leToken();
 		if (BLOCO())
@@ -1038,20 +1103,22 @@ int TRY()
 				leToken();
 				if (BLOCO())
 				{
-					if (tk == TKEnd) // TKEnd
+					if (tk == TKEnd)
 					{
 						leToken();
 						return 1;
 					}
-					else { return 0; }
+					erroEnd();
+					return 0;
 				}
-				else { return 0; }
+				return 0;
 			}
-			else { return 0; }
+			msgErro("CATCH faltando!");
+			return 0;
 		}
-		else { return 0; }
+		return 0;
 	}
-	else { return 0; }
+	return 0;
 }
 
 int CRIAFUNCTION()
@@ -1068,13 +1135,14 @@ int CRIAFUNCTION()
 					leToken();
 					return 1;
 				}
-				else { return 0; }
+				erroEnd();
+				return 0;
 			}
-			else { return 0; }
+			return 0;
 		}
-		else { return 0; }
+		return 0;
 	}
-	else { return 0; }
+	return 0;
 }
 
 int PARAM2()
@@ -1083,6 +1151,7 @@ int PARAM2()
 	{
 		return 1;
 	}
+	erroVal();
 	return 0;
 }
 
@@ -1139,13 +1208,14 @@ int FUNCTION()
 					leToken();
 					return 1;
 				}
-				else { return 0; }
+				erroFechaPar();
+				return 0;
 			}
-			else { return 0; }
+			return 0;
 		}
-		else { return 0; }
+		return 0;
 	}
-	else { return 0; }
+	return 0;
 }
 
 int PARFOR()
@@ -1169,19 +1239,24 @@ int PARFOR()
 							{
 								return 1;
 							}
-							else { return 0; }
+							erroEnd();
+							return 0;
 						}
-						else { return 0; }
+						msgErro("Ponto e virgula esperado");
+						return 0;
 					}
-					else { return 0; }
+					return 0;
 				}
-				else { return 0; }
+				msgErro("Ponto e virgula esperado");
+				return 0;
 			}
-			else { return 0; }
+			erroVal();
+			return 0;
 		}
-		else { return 0; }
+		erroDoisPt();
+		return 0;
 	}
-	else { return 0; }
+	return 0;
 }
 
 int CASEVALUE2()
@@ -1236,6 +1311,7 @@ int CASEVALUE0()
 				leToken();
 				return 1;
 			}
+			msgErro("Falta fechar as chaves");
 			return 0;
 		}
 		return 0;
@@ -1245,7 +1321,7 @@ int CASEVALUE0()
 
 int CASE()
 {
-	if (tk == TKCase) // TKCase
+	if (tk == TKCase)
 	{
 		leToken();
 		if (CASEVALUE0())
@@ -1266,7 +1342,7 @@ int CASE()
 		}
 		return 0;
 	}
-	else if (tk == TKOtherwise) // TKOtherwise
+	else if (tk == TKOtherwise)
 	{
 		leToken();
 		if (BLOCO())
@@ -1280,99 +1356,19 @@ int CASE()
 
 int SWITCH()
 {
-	if (tk == TKSwitch) // TKSwitch
+	if (tk == TKSwitch)
 	{
 		leToken();
 		if (id())
 		{
 			if (CASE())
 			{
-				if (tk == TKEnd) // TKEnd
+				if (tk == TKEnd)
 				{
 					leToken();
 					return 1;
 				}
-				else { return 0; }
-			}
-			else { return 0; }
-		}
-		else { return 0; }
-	}
-	else { return 0; }
-}
-
-int	WHILE()
-{
-	if (tk == TKWhile)
-	{
-		leToken();
-		if (tk == TKAbrePar) 
-		{
-			leToken();
-			if (COMP0())
-			{
-				if (tk == TKFechaPar)
-				{
-					leToken();	
-					if (BLOCO())
-					{
-						if (tk == TKEnd)
-						{
-							leToken();
-							return 1;
-						}
-						else { return 0; }
-					}
-					else { return 0; }
-				}
-				else { return 0; }
-			}
-			else { return 0; }
-		}
-		else { return 0; }
-	}
-	else { return 0; }
-}
-
-int FOR()
-{
-	if (tk == TKFor)
-	{
-		leToken();
-		if (id())
-		{
-			if (tk == TKAtrib)
-			{
-				leToken();
-				if (VAL())
-				{
-					if (tk == TKDoisPontos)
-					{
-						leToken();
-						if (VAL())
-						{
-							if (tk == TKDoisPontos)
-							{
-								if (!VAL())
-								{
-									return 0;
-								}
-							}
-							if (BLOCO())
-							{
-								if (tk == TKEnd)
-								{
-									leToken();
-									return 1;
-								}
-								return 0;
-							}
-							return 0;
-						}
-						return 0;
-					}
-					return 0;
-				}
+				erroEnd();
 				return 0;
 			}
 			return 0;
@@ -1382,24 +1378,103 @@ int FOR()
 	return 0;
 }
 
+int	WHILE()
+{
+	if (tk == TKWhile)
+	{
+		leToken();
+		if (tk == TKAbrePar)
+		{
+			leToken();
+			if (COMP0())
+			{
+				if (tk == TKFechaPar)
+				{
+					leToken();
+					if (BLOCO())
+					{
+						if (tk == TKEnd)
+						{
+							leToken();
+							return 1;
+						}
+						erroEnd();
+						return 0;
+					}
+					return 0;
+				}
+				erroFechaPar();
+				return 0;
+			}
+			return 0;
+		}
+		erroAbrePar();
+		return 0;
+	}
+	return 0;
+}
+
+int FOR()
+{
+	if (tk == TKFor)
+	{
+		leToken();
+		if (ATRIB())
+		{
+			if (tk == TKDoisPontos)
+			{
+				leToken();
+				if (VAL())
+				{
+					if (tk == TKDoisPontos)
+					{
+						if (!VAL())
+						{
+							erroVal();
+							return 0;
+						}
+					}
+					if (BLOCO())
+					{
+						if (tk == TKEnd)
+						{
+							leToken();
+							return 1;
+						}
+						erroEnd();
+						return 0;
+					}
+					return 0;
+				}
+				erroVal();
+				return 0;
+			}
+			erroDoisPt();
+			return 0;
+		}
+		return 0;
+	}
+	return 0;
+}
+
 int VAL()
 {
-	int marcaPos = pos;
+	int marcaPos = setPos();
 	if (FUNCTION())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (COMP0())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (id())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (cte())
 	{
 		return 1;
@@ -1409,52 +1484,52 @@ int VAL()
 
 int COMANDO()
 {
-	int marcaPos = pos;
+	int marcaPos = setPos();
 	if (ATRIB())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (FOR())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (WHILE())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (SWITCH())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (IF())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (TRY())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (PARFOR())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (CRIAFUNCTION())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (FUNCTION())
 	{
 		return 1;
 	}
-	pos = marcaPos;
+	voltaPos(marcaPos);
 	if (tk == TKBreak)
 	{
 		leToken();
@@ -1472,7 +1547,8 @@ int COMANDO()
 		{
 			return 1;
 		}
-		return 1;
+		erroVal();
+		return 0;
 	}
 	return 0;
 }
@@ -1485,7 +1561,16 @@ int BLOCO()
 		{
 			leToken();
 		}
-		BLOCO();
+		if (tk == TKId || tk == TKFor || tk == TKWhile || tk == TKSwitch ||
+			tk == TKIf || tk == TKTry || tk == TKParfor || tk == TKFunction ||
+			tk == TKBreak || tk == TKContinue || tk == TKReturn)
+		{
+			if (BLOCO())
+			{
+				return 1;
+			}
+			return 0;
+		}
 		return 1;
 	}
 	else
@@ -1510,10 +1595,10 @@ int main()
 {
 	int i = 0;
 	char ch;
-	size_t space = 1;
 	characters = (char *)malloc(space);
+	tokens = (int *)malloc(space);
 
-	FILE * fp = fopen("C://Entrada.m", "r");
+	FILE * fp = fopen("Entrada.m", "r");
 
 	if (fp == NULL)
 	{
@@ -1540,36 +1625,21 @@ int main()
 		getchar();
 		exit(1);
 	}
-	
+
 	do
 	{
 		leToken();
 		if (!INICIO())
 		{
-			printf("TOKEN %d\n", tk);
-			printf("Erro\n");
+			getchar();
+			return 0;
 		}
 	} while (tk != TKFim);
-
-	/*while ((tk = rec_equ(characters, lex, &linha, &coluna)) != TKFim)
-	{
-	if (tk == TKErro)
-	{
-	printf("Ocorreu um erro lexico!\n");
-	break;
-	}
-
-	printf("Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
-	fprintf(newFile, "Token: %d\t Linha: %d\t Coluna: %d\tLex: %s \n", tk, linha, coluna, lex);
-	coluna += strlen(lex) - 1;
-	if (lex[strlen(lex) - 1] == '\n')
-	linha++;
-	}*/
 
 	fclose(newFile);
 
 	printf("Arquivo gerado com sucesso!");
-	
+
 	getchar();
 	system("pause");
 	return 0;
