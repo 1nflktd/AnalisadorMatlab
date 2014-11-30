@@ -174,8 +174,7 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			if (c == ',') { return TKVirgula; }
 			if (c == ';') { return TKPontoeVirg; }
 			if (c == ':') { return TKDoisPontos; }
-			if (c == '_') { return TKErro; }
-			break;
+			return TKErro;
 		case 1:
 			if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_')
 			{
@@ -204,9 +203,10 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			}
 			else if (c == '\n')
 			{
-				lex[--posl] = '\0';
+				posl = 0;
 				//return TKComentario;
 				estado = 0;
+				break;
 			}
 			else
 			{
@@ -218,6 +218,11 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 			if (c == '%')
 			{
 				estado = 5;
+			}
+			if (c == '\n')
+			{
+				(*linha) += 1;
+				(*coluna) = 0;
 			}
 			pos++;
 			break;
@@ -232,18 +237,22 @@ int rec_equ(char st[], char lex[], int * linha, int * coluna)
 				estado = 4;
 				break;
 			}
-			lex[posl] = '\0';
+			posl = 0;
 			//return TKComentario;
 			estado = 0;
+			break;
 		case 6:
-			if (c != '\n')
+			if (c != '\n' && c != '\0')
 			{
 				pos++;
-				break;
 			}
-			lex[--posl] = '\0';
-			//return TKComentario;
-			estado = 0;
+			else
+			{
+				posl = 0;
+				//return TKComentario;
+				estado = 0;
+			}
+			break;
 		case 7:
 			if (c >= '0' && c <= '9')
 			{
@@ -386,10 +395,13 @@ void leToken()
 		tk = rec_equ(characters, lex, &linha, &coluna);
 		if (tk == TKErro)
 		{
-			printf("Token desconhecido!\tLinha: %d\tColuna: %d\n");
+			printf("Token desconhecido!\tLinha: %d\tColuna: %d\n", linha, coluna);
 			return;
 		}
-
+		if (tk == TKFim)
+		{
+			return;
+		}
 		ultPosTK = posTK;
 		tokens = (struct token *)realloc(tokens, sizeof(struct token) * space);
 		tokens[posTK].tk = tk;
@@ -401,6 +413,7 @@ void leToken()
 		{
 			linha++;
 		}
+		
 	}
 	else
 	{
@@ -1598,7 +1611,7 @@ int main()
 	characters = (char *)malloc(space);
 	tokens = (int *)malloc(space);
 
-	FILE * fp = fopen("Entrada.m", "r");
+	FILE * fp = fopen("C:\\Entrada.m", "r");
 
 	if (fp == NULL)
 	{
@@ -1626,15 +1639,17 @@ int main()
 		exit(1);
 	}
 
-	do
+	leToken();
+	while (tk != TKFim)
 	{
-		leToken();
 		if (!INICIO())
 		{
 			getchar();
 			return 0;
 		}
-	} while (tk != TKFim);
+		leToken();
+	}
+	
 
 	fclose(newFile);
 
