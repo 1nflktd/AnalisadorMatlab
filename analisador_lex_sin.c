@@ -413,7 +413,7 @@ void leToken()
 		{
 			linha++;
 		}
-		
+
 	}
 	else
 	{
@@ -455,6 +455,11 @@ void erroVal()
 void erroDoisPt()
 {
 	msgErro("Dois pontos esperado!!");
+}
+
+void ocorreuErro()
+{
+	msgErro("Ocorreu um erro");
 }
 
 void voltaPos(int posicao)
@@ -1079,16 +1084,19 @@ int IF()
 					leToken();
 					if (BLOCO())
 					{
-						if (ELSE())
+						if (tk == TKElse || tk == TKElseIf)
 						{
-							if (tk == TKEnd)
+							if (!ELSE())
 							{
-								leToken();
-								return 1;
+								return 0;
 							}
-							erroEnd();
-							return 0;
 						}
+						if (tk == TKEnd)
+						{
+							leToken();
+							return 1;
+						}
+						erroEnd();
 						return 0;
 					}
 					return 0;
@@ -1609,9 +1617,9 @@ int main()
 	int i = 0;
 	char ch;
 	characters = (char *)malloc(space);
-	tokens = (int *)malloc(space);
+	tokens = (struct token *)malloc(space);
 
-	FILE * fp = fopen("C:\\Entrada.m", "r");
+	FILE * fp = fopen("Entrada.m", "r");
 
 	if (fp == NULL)
 	{
@@ -1644,12 +1652,13 @@ int main()
 	{
 		if (!INICIO())
 		{
+			ocorreuErro();
 			getchar();
 			return 0;
 		}
 		leToken();
 	}
-	
+
 
 	fclose(newFile);
 
