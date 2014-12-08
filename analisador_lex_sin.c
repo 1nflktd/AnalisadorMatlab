@@ -1449,6 +1449,7 @@ int FOR()
 				{
 					if (tk == TKDoisPontos)
 					{
+						leToken();
 						if (!VAL())
 						{
 							erroVal();
